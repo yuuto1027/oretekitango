@@ -1153,25 +1153,28 @@
             document.getElementById('deck-import-form').classList.remove('hidden');
         }
         
-        // ▼▼▼ 共有・インポート関数を全面的に修正 ▼▼▼
+        // ▼▼▼ 共有・インポート関数を最終修正 ▼▼▼
         async function shareDeck(index) {
-            const deckToShare = customDecks[index];
-            const shareableDeck = {
-                name: deckToShare.name,
-                words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
-            };
             try {
+                const deckToShare = customDecks[index];
+                const shareableDeck = {
+                    name: deckToShare.name,
+                    words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
+                };
+
+                // 1. JSONをUTF-8のバイト配列に変換
                 const jsonString = JSON.stringify(shareableDeck);
                 const utf8Bytes = new TextEncoder().encode(jsonString);
-                const compressed = pako.deflate(utf8Bytes);
+                
+                // 2. バイト配列をpakoで圧縮
+                const compressedBytes = pako.deflate(utf8Bytes);
 
-                const base64String = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(new Blob([compressed]));
-                });
+                // 3. 圧縮されたバイト配列をBase64文字列に変換
+                //    btoa()がバイナリ文字列を要求するため、バイト配列を文字コードに変換する
+                const binaryString = String.fromCharCode.apply(null, compressedBytes);
+                const base64String = btoa(binaryString);
 
+                // 4. クリップボードにコピー
                 await navigator.clipboard.writeText(base64String);
                 alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
 
@@ -1188,18 +1191,24 @@
                 return;
             }
             try {
+                // 1. Base64文字列をバイナリ文字列にデコード
                 const binaryString = atob(code);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
+                
+                // 2. バイナリ文字列をバイト配列に変換
+                const compressedBytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    compressedBytes[i] = binaryString.charCodeAt(i);
                 }
 
-                const decompressed = pako.inflate(bytes);
-                const jsonString = new TextDecoder().decode(decompressed);
+                // 3. バイト配列をpakoで解凍
+                const decompressedBytes = pako.inflate(compressedBytes);
+
+                // 4. 解凍されたUTF-8バイト配列をJSON文字列に変換
+                const jsonString = new TextDecoder().decode(decompressedBytes);
                 
                 const importedData = JSON.parse(jsonString);
 
+                // 5. データの検証と保存
                 if (!importedData.name || typeof importedData.name !== 'string' || !Array.isArray(importedData.words)) {
                     throw new Error('Invalid deck format');
                 }
