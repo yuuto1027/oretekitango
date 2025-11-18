@@ -1153,8 +1153,8 @@
             document.getElementById('deck-import-form').classList.remove('hidden');
         }
         
-        // ▼▼▼ 共有・インポート関数を修正 ▼▼▼
-        function shareDeck(index) {
+        // ▼▼▼ 共有・インポート関数を全面的に修正 ▼▼▼
+        async function shareDeck(index) {
             const deckToShare = customDecks[index];
             const shareableDeck = {
                 name: deckToShare.name,
@@ -1165,24 +1165,15 @@
                 const utf8Bytes = new TextEncoder().encode(jsonString);
                 const compressed = pako.deflate(utf8Bytes);
 
-                const blob = new Blob([compressed], { type: 'application/octet-stream' });
-                const reader = new FileReader();
-                
-                reader.onload = function(event) {
-                    const base64String = event.target.result.split(',')[1];
-                    navigator.clipboard.writeText(base64String).then(() => {
-                        alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
-                    }, () => {
-                        alert('クリップボードへのコピーに失敗しました。');
-                    });
-                };
+                const base64String = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(new Blob([compressed]));
+                });
 
-                reader.onerror = function() {
-                    alert('共有コードの作成に失敗しました。');
-                    console.error("FileReader error:", reader.error);
-                };
-                
-                reader.readAsDataURL(blob);
+                await navigator.clipboard.writeText(base64String);
+                alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
 
             } catch (e) {
                 alert('共有コードの作成に失敗しました。');
@@ -1198,13 +1189,14 @@
             }
             try {
                 const binaryString = atob(code);
-                const compressed = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    compressed[i] = binaryString.charCodeAt(i);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
                 }
 
-                const utf8Bytes = pako.inflate(compressed);
-                const jsonString = new TextDecoder().decode(utf8Bytes);
+                const decompressed = pako.inflate(bytes);
+                const jsonString = new TextDecoder().decode(decompressed);
                 
                 const importedData = JSON.parse(jsonString);
 
