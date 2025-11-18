@@ -1186,7 +1186,7 @@
                     const base64String = btoa(unescape(encodeURIComponent(jsonString)));
 
                     await navigator.clipboard.writeText(base64String);
-                    alert(`デッキ「${deckToShare.name}」の共有コード（圧縮なし）をクリップボードにコピーしました。`);
+                    alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
 
                 } catch (fallbackError) {
                     alert('共有コードの作成に失敗しました。');
