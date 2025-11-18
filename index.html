@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- ↓ この行を追加して、システムの強制ダークモードを制御します -->
     <meta name="color-scheme" content="light dark">
     <title>俺的英単語アプリ</title>
-    <!-- Font Awesome CDN を追加 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
       tailwind.config = {
@@ -45,6 +43,9 @@
             background-color: #2d3748 !important;
         }
         .dark-mode .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+        .dark-mode .text-gray-700 {
             color: #e2e8f0 !important;
         }
         .dark-mode .text-gray-600 {
@@ -207,7 +208,11 @@
         <div id="quiz-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
                 <div class="flex justify-between items-center">
-                    <button onclick="quitQuiz()" class="text-gray-600 hover:text-gray-800 text-sm sm:text-base">← 中断して戻る</button>
+                    <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
+                    <button onclick="quitQuiz()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <i class="fa-solid fa-xmark"></i> 中断
+                    </button>
+                    <!-- ▲▲▲ ここまで ▲▲▲ -->
                     <span id="quiz-progress-text" class="text-sm sm:text-lg text-gray-600">問題 <span id="current-question">1</span> / 20</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
@@ -235,7 +240,7 @@
             <div class="flex justify-center mb-6">
                 <div class="relative w-48 h-48">
                     <svg viewBox="0 0 200 200" class="transform -rotate-90">
-                        <circle cx="100" cy="100" r="80" fill="none" stroke="#fee2e2" stroke-width="40"/>
+                        <circle cx="100" cy="100" r="80" fill="none" class="stroke-red-100 dark:stroke-red-900" stroke-width="40"/>
                         <circle id="result-circle" cx="100" cy="100" r="80" fill="none" stroke="#22c55e" stroke-width="40" 
                                 stroke-dasharray="0 502.4" stroke-linecap="round"/>
                     </svg>
@@ -280,7 +285,11 @@
         <!-- クイズメニュー画面 -->
         <div id="quiz-menu-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <button onclick="backToTitle()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← タイトルに戻る</button>
+                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
+                <button onclick="backToTitle()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
+                    <i class="fa-solid fa-chevron-left"></i> タイトルに戻る
+                </button>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">問題を選ぶ</h1>
                 <p class="text-sm sm:text-base text-gray-600">学習したい問題カードを選んでください</p>
             </div>
@@ -293,19 +302,21 @@
         <!-- デッキ詳細メニュー画面 -->
         <div id="deck-menu-detail-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <button onclick="goToQuizMenu()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← 問題を選ぶに戻る</button>
+                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
+                <button onclick="goToQuizMenu()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
+                    <i class="fa-solid fa-chevron-left"></i> 問題を選ぶに戻る
+                </button>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 id="deck-menu-name" class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2"></h1>
                 <p class="text-sm sm:text-base text-gray-600">デッキ情報と学習開始</p>
             </div>
 
-            <!-- ▼▼▼ 進捗度グラフ表示エリアを追加 ▼▼▼ -->
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">学習進捗度</h2>
                 <div id="deck-progress-container" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-200">
                     <!-- グラフがここに表示される -->
                 </div>
             </div>
-            <!-- ▲▲▲ ここまで ▲▲▲ -->
             
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">苦手な単語 Top 5</h2>
@@ -322,7 +333,11 @@
         <!-- 単語追加画面（デッキ管理） -->
         <div id="create-deck-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <button onclick="backToTitle()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← タイトルに戻る</button>
+                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
+                <button onclick="backToTitle()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
+                    <i class="fa-solid fa-chevron-left"></i> タイトルに戻る
+                </button>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">単語デッキ管理</h1>
                 <p class="text-sm sm:text-base text-gray-600">デッキの作成・編集・削除ができます</p>
             </div>
@@ -383,7 +398,11 @@
         <!-- 単語カードメニュー画面 -->
         <div id="flashcard-menu-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <button onclick="backToTitle()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← タイトルに戻る</button>
+                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
+                <button onclick="backToTitle()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
+                    <i class="fa-solid fa-chevron-left"></i> タイトルに戻る
+                </button>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">単語カードを選ぶ</h1>
                 <p class="text-sm sm:text-base text-gray-600">復習したい単語カードを選んでください</p>
             </div>
@@ -410,7 +429,11 @@
             </div>
 
             <div class="flex justify-between items-center mb-6">
-                <button onclick="backToFlashcardMenu()" class="text-gray-600 hover:text-gray-800 text-sm sm:text-base">← 戻る</button>
+                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
+                <button onclick="backToFlashcardMenu()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fa-solid fa-chevron-left"></i> 戻る
+                </button>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <div class="flex items-center space-x-4">
                     <span class="text-sm sm:text-base text-gray-600" id="flashcard-progress">1 / 10</span>
                     <button onclick="openSideMenu()" class="bg-white border-2 border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-all">
@@ -466,7 +489,6 @@
                     </label>
                 </div>
                 
-                <!-- ▼▼▼ 音声ミュートボタンを追加 ▼▼▼ -->
                 <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                     <div class="flex items-center">
                         <span id="mute-icon-in-settings" class="text-2xl mr-3 w-8 text-center"></span>
@@ -477,7 +499,6 @@
                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
                     </label>
                 </div>
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
 
                 <button onclick="confirmDeleteAllData()" class="w-full flex items-center justify-center bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-200 font-bold py-3 px-4 rounded-lg hover:bg-red-200 dark:hover:bg-red-700 transition-colors">
                     <i class="fa-solid fa-trash-can mr-2"></i>
@@ -491,9 +512,7 @@
         const DEFAULT_PRIORITY = 10;
         let customDecks = JSON.parse(localStorage.getItem('customDecks') || '[]');
         
-        // ▼▼▼ 音声読み上げの状態を管理する変数を追加 ▼▼▼
         let isMuted = localStorage.getItem('isMuted') === 'true';
-        // ▲▲▲ ここまで ▲▲▲
 
         customDecks.forEach(deck => {
             deck.words.forEach(word => {
@@ -519,9 +538,7 @@
             document.getElementById('progress-bar').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
             document.getElementById('quiz-progress-text').innerHTML = `問題 <span id="current-question">${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
 
-            // ▼▼▼ 問題表示時に単語を読み上げる ▼▼▼
             speak(question.english);
-            // ▲▲▲ ここまで ▲▲▲
 
             const options = [question.japanese];
             const otherWords = allQuizWords.filter(w => w.japanese !== question.japanese);
@@ -679,18 +696,16 @@
             document.getElementById('deck-menu-name').innerHTML = `<i class="fa-solid fa-file-pen mr-2"></i> ${deck.name}`;
             document.getElementById('start-quiz-from-menu-btn').onclick = () => startQuizFromDeck(deckId);
             
-            // ▼▼▼ 進捗度グラフの描画処理を追加 ▼▼▼
             const progressContainer = document.getElementById('deck-progress-container');
             const words = deck.words;
             if (words.length > 0) {
-                const totalProficiency = words.reduce((sum, word) => {
-                    const proficiency = Math.max(0, Math.min(100, (20 - (word.priority || DEFAULT_PRIORITY)) / 19 * 100));
-                    return sum + proficiency;
-                }, 0);
-                const averageProficiency = Math.round(totalProficiency / words.length);
+                // ▼▼▼ 進捗度の計算方法を変更 ▼▼▼
+                const masteredWordsCount = words.filter(word => (word.priority || DEFAULT_PRIORITY) < DEFAULT_PRIORITY).length;
+                const achievementRate = Math.round((masteredWordsCount / words.length) * 100);
+                // ▲▲▲ ここまで ▲▲▲
 
                 const circumference = 2 * Math.PI * 50;
-                const offset = circumference - (averageProficiency / 100) * circumference;
+                const offset = circumference - (achievementRate / 100) * circumference;
 
                 progressContainer.innerHTML = `
                     <div class="flex items-center justify-center">
@@ -702,12 +717,12 @@
                                         style="transition: stroke-dashoffset 1s ease-out;"/>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <p class="text-3xl font-bold text-gray-800">${averageProficiency}%</p>
+                                <p class="text-3xl font-bold text-gray-800">${achievementRate}%</p>
                                 <p class="text-xs text-gray-500">達成度</p>
                             </div>
                         </div>
                     </div>
-                    <p class="text-center text-sm text-gray-600 mt-4">このデッキの単語の習熟度です。</p>
+                    <p class="text-center text-sm text-gray-600 mt-4">${words.length}語中 ${masteredWordsCount}語を学習済みです。</p>
                 `;
                 
                 setTimeout(() => {
@@ -717,7 +732,6 @@
             } else {
                 progressContainer.innerHTML = '<p class="text-gray-400 text-center py-4">まだ単語がありません。</p>';
             }
-            // ▲▲▲ ここまで ▲▲▲
 
             const highPriorityWordsContainer = document.getElementById('high-priority-words');
             highPriorityWordsContainer.innerHTML = '';
@@ -783,17 +797,23 @@
             customDecks.forEach((deck, index) => {
                 const deckCard = document.createElement('div');
                 deckCard.className = 'bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg';
+                // ▼▼▼ 編集・削除ボタンのデザインを変更 ▼▼▼
                 deckCard.innerHTML = `
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-1"><i class="fa-solid fa-book mr-2 text-gray-400"></i> ${deck.name}</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 mr-4">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-1 truncate"><i class="fa-solid fa-book mr-2 text-gray-400"></i> ${deck.name}</h3>
                             <p class="text-xs sm:text-sm text-gray-600">${deck.words.length}語</p>
                         </div>
                         <div class="flex space-x-2">
-                            <button onclick="editDeck(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition-colors"><i class="fa-solid fa-pencil"></i> 編集</button>
-                            <button onclick="deleteDeckFromManagement(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors"><i class="fa-solid fa-trash"></i> 削除</button>
+                            <button onclick="editDeck(${index})" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="編集">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button onclick="deleteDeckFromManagement(${index})" class="bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-600 dark:text-red-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="削除">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </div>`;
+                // ▲▲▲ ここまで ▲▲▲
                 listContainer.appendChild(deckCard);
             });
         }
@@ -933,7 +953,7 @@
             settingsMenu.classList.remove('hidden'); settingsOverlay.classList.remove('hidden');
             setTimeout(() => settingsMenu.classList.remove('scale-95', 'opacity-0'), 10);
             updateDarkModeUI();
-            updateMuteUI(); // ミュートUIを更新
+            updateMuteUI();
         }
 
         function closeSettingsMenu() {
@@ -952,16 +972,14 @@
         }
 
         window.addEventListener('load', () => {
-            // ▼▼▼ ダークモードのシステム設定対応を追加 ▼▼▼
             const darkModeSetting = localStorage.getItem('darkMode');
             if (darkModeSetting === 'enabled' || (darkModeSetting === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.body.classList.add('dark-mode');
             }
-            // ▲▲▲ ここまで ▲▲▲
 
             updateTotalWordsCount();
             updateDarkModeUI();
-            updateMuteUI(); // ページ読み込み時にミュートUIを初期化
+            updateMuteUI();
         });
 
         let currentFlashcardDeckId = null, flashcardList = [], currentFlashcardIndex = 0, wordVisibility = {};
@@ -1020,9 +1038,7 @@
             document.getElementById('flashcard-japanese').textContent = word.japanese;
             document.getElementById('flashcard-progress').textContent = `${currentFlashcardIndex + 1} / ${flashcardList.length}`;
             document.getElementById('flashcard-inner').classList.remove('flipped');
-            // ▼▼▼ 単語カード表示時に読み上げ ▼▼▼
             speak(word.english);
-            // ▲▲▲ ここまで ▲▲▲
         }
 
         function flipFlashcard() { if(flashcardList.length > 0) document.getElementById('flashcard-inner').classList.toggle('flipped'); }
@@ -1056,7 +1072,6 @@
             updateFlashcardList(); currentFlashcardIndex = 0; showFlashcard();
         }
 
-        // ▼▼▼ 読み上げとミュート関連の関数群を追加 ▼▼▼
         function speak(text) {
             if (isMuted || !text || typeof speechSynthesis === 'undefined') return;
             const utterance = new SpeechSynthesisUtterance(text);
@@ -1075,14 +1090,12 @@
             const iconInSettings = document.getElementById('mute-icon-in-settings');
             const toggleCheckbox = document.getElementById('mute-toggle-checkbox');
             if (toggleCheckbox) {
-                // チェックされているときが「音声オン」なので、isMutedとは逆の状態
                 toggleCheckbox.checked = !isMuted;
             }
             if (iconInSettings) {
                 iconInSettings.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
             }
         }
-        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
