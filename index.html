@@ -1165,22 +1165,33 @@
                 const jsonString = JSON.stringify(shareableDeck);
                 const utf8Bytes = new TextEncoder().encode(jsonString);
                 const compressedBytes = pako.deflate(utf8Bytes);
-                
-                // チャンク処理で安全にバイナリ文字列に変換
-                let binaryString = '';
-                const CHUNK_SIZE = 8192;
-                for (let i = 0; i < compressedBytes.length; i += CHUNK_SIZE) {
-                    binaryString += String.fromCharCode.apply(null, compressedBytes.subarray(i, i + CHUNK_SIZE));
-                }
-                
-                const base64String = btoa(binaryString);
+
+                // Uint8ArrayをBase64に変換する、最も安全で互換性の高い方法
+                const base64String = btoa(String.fromCharCode.apply(null, compressedBytes));
 
                 await navigator.clipboard.writeText(base64String);
                 alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
 
             } catch (e) {
-                alert('共有コードの作成に失敗しました。');
-                console.error("Share deck error:", e);
+                 // 上記の方法で失敗した場合のフォールバック（圧縮なし）
+                try {
+                    console.warn("Compression failed, falling back to non-compressed sharing:", e);
+                    const deckToShare = customDecks[index];
+                    const shareableDeck = {
+                        name: deckToShare.name,
+                        words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
+                    };
+                    const jsonString = JSON.stringify(shareableDeck);
+                    // unescapeとencodeURIComponentは非推奨だが、この目的では最も互換性が高い
+                    const base64String = btoa(unescape(encodeURIComponent(jsonString)));
+
+                    await navigator.clipboard.writeText(base64String);
+                    alert(`デッキ「${deckToShare.name}」の共有コード（圧縮なし）をクリップボードにコピーしました。`);
+
+                } catch (fallbackError) {
+                    alert('共有コードの作成に失敗しました。');
+                    console.error("Share deck fallback error:", fallbackError);
+                }
             }
         }
 
@@ -1191,14 +1202,21 @@
                 return;
             }
             try {
-                const binaryString = atob(code);
-                const bytes = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
+                let jsonString;
+                // まずは圧縮データとして解凍を試みる
+                try {
+                    const binaryString = atob(code);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const decompressedBytes = pako.inflate(bytes);
+                    jsonString = new TextDecoder().decode(decompressedBytes);
+                } catch (e) {
+                    // 解凍に失敗したら、圧縮されていないデータとして処理を試みる
+                    console.warn("Decompression failed, trying non-compressed import:", e);
+                    jsonString = decodeURIComponent(escape(atob(code)));
                 }
-
-                const decompressedBytes = pako.inflate(bytes);
-                const jsonString = new TextDecoder().decode(decompressedBytes);
                 
                 const importedData = JSON.parse(jsonString);
 
