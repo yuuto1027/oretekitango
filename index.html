@@ -1154,16 +1154,6 @@
         }
         
         // ▼▼▼ 共有・インポート関数を最終修正 ▼▼▼
-        function bytesToString(bytes) {
-            const CHUNK_SIZE = 8192;
-            let result = '';
-            for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-                const chunk = bytes.subarray(i, i + CHUNK_SIZE);
-                result += String.fromCharCode.apply(null, chunk);
-            }
-            return result;
-        }
-
         async function shareDeck(index) {
             try {
                 const deckToShare = customDecks[index];
@@ -1176,7 +1166,13 @@
                 const utf8Bytes = new TextEncoder().encode(jsonString);
                 const compressedBytes = pako.deflate(utf8Bytes);
                 
-                const binaryString = bytesToString(compressedBytes);
+                // チャンク処理で安全にバイナリ文字列に変換
+                let binaryString = '';
+                const CHUNK_SIZE = 8192;
+                for (let i = 0; i < compressedBytes.length; i += CHUNK_SIZE) {
+                    binaryString += String.fromCharCode.apply(null, compressedBytes.subarray(i, i + CHUNK_SIZE));
+                }
+                
                 const base64String = btoa(binaryString);
 
                 await navigator.clipboard.writeText(base64String);
