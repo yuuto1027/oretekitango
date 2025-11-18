@@ -1162,9 +1162,10 @@
             try {
                 // ▼▼▼ 共有コード作成処理を修正 ▼▼▼
                 const jsonString = JSON.stringify(shareableDeck);
-                const compressed = pako.deflate(jsonString); // Uint8Array を取得
+                const textEncoder = new TextEncoder();
+                const utf8Bytes = textEncoder.encode(jsonString);
+                const compressed = pako.deflate(utf8Bytes);
 
-                // Uint8Array をバイナリ文字列に変換
                 let binaryString = '';
                 for (let i = 0; i < compressed.length; i++) {
                     binaryString += String.fromCharCode(compressed[i]);
@@ -1180,7 +1181,7 @@
                 });
             } catch (e) {
                 alert('共有コードの作成に失敗しました。');
-                console.error(e);
+                console.error("Share deck error:", e);
             }
         }
 
@@ -1194,13 +1195,15 @@
                 // ▼▼▼ インポート処理を修正 ▼▼▼
                 const binaryString = atob(code);
 
-                // バイナリ文字列を Uint8Array に変換
                 const compressed = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
                     compressed[i] = binaryString.charCodeAt(i);
                 }
 
-                const jsonString = pako.inflate(compressed, { to: 'string' });
+                const utf8Bytes = pako.inflate(compressed);
+                const textDecoder = new TextDecoder();
+                const jsonString = textDecoder.decode(utf8Bytes);
+                
                 const importedData = JSON.parse(jsonString);
                 // ▲▲▲ ここまで ▲▲▲
 
