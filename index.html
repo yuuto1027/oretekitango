@@ -6,9 +6,7 @@
     <meta name="color-scheme" content="light dark">
     <title>俺的英単語アプリ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- ▼▼▼ 共有コード圧縮用のライブラリ(pako.js)を追加 ▼▼▼ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" integrity="sha512-g2TeAWw5GPnX7iGgEcIcKTFRIiBKRIM5Q_uABmQpCXNlnjtA94LOvPAqESb/sCgzNsCzLSdJXD7bvq8rVIMvYg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- ▲▲▲ ここまで ▲▲▲ -->
     <script>
       tailwind.config = {
         darkMode: ['class', '.dark-mode'],
@@ -811,7 +809,6 @@
             customDecks.forEach((deck, index) => {
                 const deckCard = document.createElement('div');
                 deckCard.className = 'bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg';
-                // ▼▼▼ ボタンレイアウトを修正 ▼▼▼
                 deckCard.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex-1 mr-2 sm:mr-4 min-w-0">
@@ -830,7 +827,6 @@
                             </button>
                         </div>
                     </div>`;
-                // ▲▲▲ ここまで ▲▲▲
                 listContainer.appendChild(deckCard);
             });
         }
@@ -1164,10 +1160,17 @@
                 words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
             };
             try {
-                // ▼▼▼ pakoで圧縮して共有コードを短縮 ▼▼▼
+                // ▼▼▼ 共有コード作成処理を修正 ▼▼▼
                 const jsonString = JSON.stringify(shareableDeck);
-                const compressed = pako.deflate(jsonString, { to: 'string' });
-                const base64String = btoa(compressed);
+                const compressed = pako.deflate(jsonString); // Uint8Array を取得
+
+                // Uint8Array をバイナリ文字列に変換
+                let binaryString = '';
+                for (let i = 0; i < compressed.length; i++) {
+                    binaryString += String.fromCharCode(compressed[i]);
+                }
+                
+                const base64String = btoa(binaryString);
                 // ▲▲▲ ここまで ▲▲▲
 
                 navigator.clipboard.writeText(base64String).then(() => {
@@ -1188,8 +1191,15 @@
                 return;
             }
             try {
-                // ▼▼▼ pakoで解凍してデッキを復元 ▼▼▼
-                const compressed = atob(code);
+                // ▼▼▼ インポート処理を修正 ▼▼▼
+                const binaryString = atob(code);
+
+                // バイナリ文字列を Uint8Array に変換
+                const compressed = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    compressed[i] = binaryString.charCodeAt(i);
+                }
+
                 const jsonString = pako.inflate(compressed, { to: 'string' });
                 const importedData = JSON.parse(jsonString);
                 // ▲▲▲ ここまで ▲▲▲
