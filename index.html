@@ -147,7 +147,6 @@
     <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-2xl">
         <!-- タイトル画面 -->
         <div id="title-screen" class="fade-in">
-            <!-- 設定ボタン -->
             <div class="flex justify-end mb-4">
                 <button onclick="openSettingsMenu()" id="settings-btn" class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:shadow-xl transition-all">
                     <i class="fa-solid fa-gear text-xl"></i>
@@ -208,11 +207,9 @@
         <div id="quiz-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
                 <div class="flex justify-between items-center">
-                    <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
                     <button onclick="quitQuiz()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <i class="fa-solid fa-xmark"></i> 中断
                     </button>
-                    <!-- ▲▲▲ ここまで ▲▲▲ -->
                     <span id="quiz-progress-text" class="text-sm sm:text-lg text-gray-600">問題 <span id="current-question">1</span> / 20</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
@@ -285,11 +282,9 @@
         <!-- クイズメニュー画面 -->
         <div id="quiz-menu-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
                 <button onclick="backToTitle()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
                     <i class="fa-solid fa-chevron-left"></i> タイトルに戻る
                 </button>
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">問題を選ぶ</h1>
                 <p class="text-sm sm:text-base text-gray-600">学習したい問題カードを選んでください</p>
             </div>
@@ -302,11 +297,9 @@
         <!-- デッキ詳細メニュー画面 -->
         <div id="deck-menu-detail-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
                 <button onclick="goToQuizMenu()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
                     <i class="fa-solid fa-chevron-left"></i> 問題を選ぶに戻る
                 </button>
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 id="deck-menu-name" class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2"></h1>
                 <p class="text-sm sm:text-base text-gray-600">デッキ情報と学習開始</p>
             </div>
@@ -333,16 +326,13 @@
         <!-- 単語追加画面（デッキ管理） -->
         <div id="create-deck-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
                 <button onclick="backToTitle()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
                     <i class="fa-solid fa-chevron-left"></i> タイトルに戻る
                 </button>
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">単語デッキ管理</h1>
                 <p class="text-sm sm:text-base text-gray-600">デッキの作成・編集・削除ができます</p>
             </div>
 
-            <!-- タブ切り替え -->
             <div class="flex mb-6 border-b-2 border-gray-200">
                 <button id="deck-list-tab" onclick="switchTab('list')" class="flex-1 py-3 font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors">
                     デッキ一覧
@@ -352,57 +342,73 @@
                 </button>
             </div>
 
-            <!-- デッキ一覧タブ -->
             <div id="deck-list-content" class="space-y-4">
                 <div id="deck-management-list">
                     <!-- デッキ一覧がここに表示されます -->
                 </div>
             </div>
-
-            <!-- 新規作成タブ -->
+            
+            <!-- ▼▼▼ 「新規作成」タブの内容を共有機能に対応 ▼▼▼ -->
             <div id="deck-create-content" class="hidden">
-                <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-                    <div class="mb-4 sm:mb-6">
-                        <label class="block text-gray-700 font-bold mb-2 text-sm sm:text-base">デッキ名</label>
-                        <input type="text" id="deck-name" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="例: TOEIC頻出単語">
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-bold text-gray-800 text-sm sm:text-base">単語リスト</h3>
-                            <input type="text" id="deck-word-search" class="px-3 py-1 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm" placeholder="単語を検索...">
-                        </div>
-                        <div id="deck-words-list" class="space-y-2 mb-4 max-h-48 sm:max-h-60 overflow-y-auto">
-                            <!-- 追加された単語がここに表示されます -->
-                        </div>
-                    </div>
-
-                    <div class="border-t-2 border-gray-200 pt-4">
-                        <h4 class="font-semibold text-gray-700 mb-3 text-sm sm:text-base">単語を追加</h4>
-                        <div class="mb-3">
-                            <input type="text" id="word-english" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-2 text-sm sm:text-base" placeholder="英単語">
-                            <input type="text" id="word-japanese" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="日本語の意味">
-                        </div>
-                        <button onclick="addWordToDeck()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm sm:text-base">
-                            <i class="fa-solid fa-plus mr-2"></i>単語を追加
-                        </button>
-                    </div>
+                <div id="deck-create-choice" class="space-y-4">
+                    <button onclick="showCreateForm()" class="w-full bg-white border-2 border-blue-200 hover:border-blue-400 text-gray-800 font-bold py-8 px-6 rounded-2xl text-lg shadow-lg flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-plus text-3xl mb-3 text-blue-500"></i>
+                        <span>新しい単語デッキを作る</span>
+                    </button>
+                    <button onclick="showImportForm()" class="w-full bg-white border-2 border-green-200 hover:border-green-400 text-gray-800 font-bold py-8 px-6 rounded-2xl text-lg shadow-lg flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-paste text-3xl mb-3 text-green-500"></i>
+                        <span>共有されたデッキを追加する</span>
+                    </button>
                 </div>
 
-                <button onclick="saveDeck()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors shadow-lg mb-3 text-sm sm:text-base">
-                    <i class="fa-solid fa-floppy-disk mr-2"></i>デッキを保存
-                </button>
+                <div id="deck-create-form" class="hidden">
+                    <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
+                        <div class="mb-4 sm:mb-6">
+                            <label class="block text-gray-700 font-bold mb-2 text-sm sm:text-base">デッキ名</label>
+                            <input type="text" id="deck-name" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="例: TOEIC頻出単語">
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-bold text-gray-800 text-sm sm:text-base">単語リスト</h3>
+                                <input type="text" id="deck-word-search" class="px-3 py-1 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm" placeholder="単語を検索...">
+                            </div>
+                            <div id="deck-words-list" class="space-y-2 mb-4 max-h-48 sm:max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <div class="border-t-2 border-gray-200 pt-4">
+                            <h4 class="font-semibold text-gray-700 mb-3 text-sm sm:text-base">単語を追加</h4>
+                            <div class="mb-3">
+                                <input type="text" id="word-english" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-2 text-sm sm:text-base" placeholder="英単語">
+                                <input type="text" id="word-japanese" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="日本語の意味">
+                            </div>
+                            <button onclick="addWordToDeck()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm sm:text-base">
+                                <i class="fa-solid fa-plus mr-2"></i>単語を追加
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="saveDeck()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors shadow-lg mb-3 text-sm sm:text-base">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i>デッキを保存
+                    </button>
+                </div>
+
+                <div id="deck-import-form" class="hidden">
+                    <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
+                         <label class="block text-gray-700 font-bold mb-2 text-sm sm:text-base">共有コード</label>
+                         <textarea id="deck-import-code" rows="5" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-green-500" placeholder="ここに共有コードを貼り付けてください"></textarea>
+                    </div>
+                    <button onclick="importDeck()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors shadow-lg mb-3 text-sm sm:text-base">
+                        <i class="fa-solid fa-download mr-2"></i>デッキをインポート
+                    </button>
+                </div>
             </div>
+            <!-- ▲▲▲ ここまで ▲▲▲ -->
         </div>
 
         <!-- 単語カードメニュー画面 -->
         <div id="flashcard-menu-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
-                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
                 <button onclick="backToTitle()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
                     <i class="fa-solid fa-chevron-left"></i> タイトルに戻る
                 </button>
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">単語カードを選ぶ</h1>
                 <p class="text-sm sm:text-base text-gray-600">復習したい単語カードを選んでください</p>
             </div>
@@ -429,11 +435,9 @@
             </div>
 
             <div class="flex justify-between items-center mb-6">
-                <!-- ▼▼▼ 戻るボタンのデザインを変更 ▼▼▼ -->
                 <button onclick="backToFlashcardMenu()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                     <i class="fa-solid fa-chevron-left"></i> 戻る
                 </button>
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <div class="flex items-center space-x-4">
                     <span class="text-sm sm:text-base text-gray-600" id="flashcard-progress">1 / 10</span>
                     <button onclick="openSideMenu()" class="bg-white border-2 border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-all">
@@ -699,10 +703,8 @@
             const progressContainer = document.getElementById('deck-progress-container');
             const words = deck.words;
             if (words.length > 0) {
-                // ▼▼▼ 進捗度の計算方法を変更 ▼▼▼
                 const masteredWordsCount = words.filter(word => (word.priority || DEFAULT_PRIORITY) < DEFAULT_PRIORITY).length;
                 const achievementRate = Math.round((masteredWordsCount / words.length) * 100);
-                // ▲▲▲ ここまで ▲▲▲
 
                 const circumference = 2 * Math.PI * 50;
                 const offset = circumference - (achievementRate / 100) * circumference;
@@ -768,6 +770,11 @@
             const createTab = document.getElementById('deck-create-tab');
             const listContent = document.getElementById('deck-list-content');
             const createContent = document.getElementById('deck-create-content');
+            
+            const deckCreateChoice = document.getElementById('deck-create-choice');
+            const deckCreateForm = document.getElementById('deck-create-form');
+            const deckImportForm = document.getElementById('deck-import-form');
+
             const isActive = tab === 'list';
             listTab.classList.toggle('text-indigo-600', isActive); listTab.classList.toggle('border-indigo-600', isActive);
             listTab.classList.toggle('text-gray-400', !isActive); listTab.classList.toggle('border-transparent', !isActive);
@@ -779,12 +786,18 @@
                 createTab.textContent = '新規作成';
                 renderDeckManagementList();
             } else {
+                deckCreateChoice.classList.remove('hidden');
+                deckCreateForm.classList.add('hidden');
+                deckImportForm.classList.add('hidden');
+
                 if (isEditingMode) {
                     createTab.textContent = 'デッキ編集';
+                    showCreateForm();
                 } else {
                     createTab.textContent = '新規作成';
                     editingDeckIndex = -1; currentDeckWords = [];
                     ['deck-name', 'word-english', 'word-japanese'].forEach(id => document.getElementById(id).value = '');
+                    document.getElementById('deck-import-code').value = '';
                 }
                 document.getElementById('deck-word-search').value = ''; renderDeckWordsList();
                 document.getElementById('deck-word-search').oninput = (e) => renderDeckWordsList(e.target.value);
@@ -797,7 +810,6 @@
             customDecks.forEach((deck, index) => {
                 const deckCard = document.createElement('div');
                 deckCard.className = 'bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg';
-                // ▼▼▼ 編集・削除ボタンのデザインを変更 ▼▼▼
                 deckCard.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex-1 mr-4">
@@ -805,6 +817,11 @@
                             <p class="text-xs sm:text-sm text-gray-600">${deck.words.length}語</p>
                         </div>
                         <div class="flex space-x-2">
+                             <!-- ▼▼▼ 共有ボタンを追加 ▼▼▼ -->
+                            <button onclick="shareDeck(${index})" class="bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-600 dark:text-green-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="共有">
+                                <i class="fa-solid fa-share-from-square"></i>
+                            </button>
+                            <!-- ▲▲▲ ここまで ▲▲▲ -->
                             <button onclick="editDeck(${index})" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="編集">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
@@ -813,7 +830,6 @@
                             </button>
                         </div>
                     </div>`;
-                // ▲▲▲ ここまで ▲▲▲
                 listContainer.appendChild(deckCard);
             });
         }
@@ -897,7 +913,8 @@
                 alert(`「${deckName}」を保存しました！`);
             }
             localStorage.setItem('customDecks', JSON.stringify(customDecks));
-            editingDeckIndex = -1; isEditingMode = false; backToTitle();
+            editingDeckIndex = -1; isEditingMode = false;
+            switchTab('list');
         }
 
         function quitQuiz() {
@@ -909,21 +926,57 @@
         }
 
         function startQuizFromDeck(deckId) {
-            lastPlayedDeckId = deckId; const sourceWords = customDecks[deckId].words;
-            if (sourceWords.length < 4) { alert('このデッキには単語が足りません（最低4語必要です）。'); return; }
-            allQuizWords = [...sourceWords]; const numQuestions = Math.min(20, sourceWords.length);
-            const weightedPool = sourceWords.flatMap(word => Array(word.priority || DEFAULT_PRIORITY).fill(word));
-            const shuffledPool = weightedPool.sort(() => Math.random() - 0.5);
-            const uniqueQuestions = new Set(); const finalQuestions = [];
-            for (const word of shuffledPool) {
-                if (finalQuestions.length >= numQuestions) break;
-                if (!uniqueQuestions.has(word.english)) { uniqueQuestions.add(word.english); finalQuestions.push(word); }
+            lastPlayedDeckId = deckId;
+            const sourceWords = customDecks[deckId].words;
+            if (sourceWords.length < 4) {
+                alert('このデッキには単語が足りません（最低4語必要です）。');
+                return;
             }
+            allQuizWords = [...sourceWords];
+            const numQuestions = Math.min(20, sourceWords.length);
+            
+            // ▼▼▼ クイズの単語選出ロジックを改善 ▼▼▼
+            let finalQuestions = [];
+            const unseenWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) === DEFAULT_PRIORITY);
+            const reviewWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) !== DEFAULT_PRIORITY);
+
+            // 1. 未学習の単語を優先的に選出 (全体の約30%)
+            const numUnseenQuestions = Math.min(unseenWords.length, Math.ceil(numQuestions * 0.3));
+            if (numUnseenQuestions > 0) {
+                const shuffledUnseen = unseenWords.sort(() => 0.5 - Math.random());
+                finalQuestions = shuffledUnseen.slice(0, numUnseenQuestions);
+            }
+            
+            // 2. 残りを復習単語から苦手度に応じて選出
+            const remainingSlots = numQuestions - finalQuestions.length;
+            if (remainingSlots > 0 && reviewWords.length > 0) {
+                const weightedPool = reviewWords.flatMap(word => Array(word.priority || DEFAULT_PRIORITY).fill(word));
+                const shuffledPool = weightedPool.sort(() => 0.5 - Math.random());
+                
+                const uniqueWordsFromPool = new Set();
+                for (const word of shuffledPool) {
+                    if (uniqueWordsFromPool.size >= remainingSlots) break;
+                    // すでに選出された単語は追加しない
+                    if (!finalQuestions.some(q => q.english === word.english)) {
+                        uniqueWordsFromPool.add(word);
+                    }
+                }
+                finalQuestions.push(...Array.from(uniqueWordsFromPool));
+            }
+
+            // 3. もし単語数が足りなければ、残りの単語からランダムに追加
             if (finalQuestions.length < numQuestions) {
-                 const remainingWords = sourceWords.filter(w => !uniqueQuestions.has(w.english)).sort(() => Math.random() - 0.5);
-                 while(finalQuestions.length < numQuestions && remainingWords.length > 0) finalQuestions.push(remainingWords.pop());
+                const existingEngWords = new Set(finalQuestions.map(w => w.english));
+                const remainingWords = sourceWords.filter(w => !existingEngWords.has(w.english))
+                                                  .sort(() => 0.5 - Math.random());
+                const needed = numQuestions - finalQuestions.length;
+                finalQuestions.push(...remainingWords.slice(0, needed));
             }
-            quizQuestions = finalQuestions; currentQuestionIndex = 0; userAnswers = [];
+            // ▲▲▲ ここまで ▲▲▲
+
+            quizQuestions = finalQuestions.sort(() => 0.5 - Math.random());
+            currentQuestionIndex = 0;
+            userAnswers = [];
             document.getElementById('deck-menu-detail-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
             showQuestion();
@@ -1023,7 +1076,7 @@
             flashcardList = customDecks[currentFlashcardDeckId].words
                 .map((word, index) => ({ ...word, originalIndex: index }))
                 .filter(word => wordVisibility[word.originalIndex])
-                .sort(() => Math.random() - 0.5);
+                .sort(() => 0.5 - Math.random());
         }
 
         function showFlashcard() {
@@ -1096,6 +1149,84 @@
                 iconInSettings.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
             }
         }
+        
+        // ▼▼▼ 共有とインポート関連の関数を追加 ▼▼▼
+        function showCreateForm() {
+            document.getElementById('deck-create-choice').classList.add('hidden');
+            document.getElementById('deck-import-form').classList.add('hidden');
+            document.getElementById('deck-create-form').classList.remove('hidden');
+        }
+
+        function showImportForm() {
+            document.getElementById('deck-create-choice').classList.add('hidden');
+            document.getElementById('deck-create-form').classList.add('hidden');
+            document.getElementById('deck-import-form').classList.remove('hidden');
+        }
+
+        function shareDeck(index) {
+            const deckToShare = customDecks[index];
+            // 共有データにはpriorityを含めない
+            const shareableDeck = {
+                name: deckToShare.name,
+                words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
+            };
+            try {
+                const jsonString = JSON.stringify(shareableDeck);
+                const base64String = btoa(encodeURIComponent(jsonString));
+                navigator.clipboard.writeText(base64String).then(() => {
+                    alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
+                }, () => {
+                    alert('クリップボードへのコピーに失敗しました。');
+                });
+            } catch (e) {
+                alert('共有コードの作成に失敗しました。');
+                console.error(e);
+            }
+        }
+
+        function importDeck() {
+            const code = document.getElementById('deck-import-code').value.trim();
+            if (!code) {
+                alert('共有コードを入力してください。');
+                return;
+            }
+            try {
+                const jsonString = decodeURIComponent(atob(code));
+                const importedData = JSON.parse(jsonString);
+
+                // データのバリデーション
+                if (!importedData.name || typeof importedData.name !== 'string' || !Array.isArray(importedData.words)) {
+                    throw new Error('Invalid deck format');
+                }
+                
+                const newDeck = {
+                    name: importedData.name,
+                    words: importedData.words.map(w => ({
+                        english: w.english,
+                        japanese: w.japanese,
+                        priority: DEFAULT_PRIORITY // priorityはデフォルト値で初期化
+                    }))
+                };
+
+                customDecks.push(newDeck);
+                localStorage.setItem('customDecks', JSON.stringify(customDecks));
+                
+                // 新しいデッキの単語カード表示設定を初期化
+                const newDeckIndex = customDecks.length - 1;
+                const visibility = {};
+                newDeck.words.forEach((_, i) => visibility[i] = true);
+                localStorage.setItem(`wordVisibility_${newDeckIndex}`, JSON.stringify(visibility));
+
+                alert(`デッキ「${newDeck.name}」を正常にインポートしました！`);
+                document.getElementById('deck-import-code').value = '';
+                switchTab('list');
+
+            } catch (e) {
+                alert('無効な共有コードです。コードが正しいか確認してください。');
+                console.error('Import error:', e);
+            }
+        }
+        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
