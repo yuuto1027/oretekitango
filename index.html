@@ -35,7 +35,11 @@
         
         /* ダークモード */
         body.dark-mode {
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            background-color: #1a202c;
+            background-image: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+        .dark-mode .bg-gradient-to-br.from-indigo-50.via-white.to-purple-50 {
+            background-image: none;
         }
         .dark-mode .bg-white {
             background-color: #2d3748 !important;
@@ -293,6 +297,15 @@
                 <h1 id="deck-menu-name" class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2"></h1>
                 <p class="text-sm sm:text-base text-gray-600">デッキ情報と学習開始</p>
             </div>
+
+            <!-- ▼▼▼ 進捗度グラフ表示エリアを追加 ▼▼▼ -->
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">学習進捗度</h2>
+                <div id="deck-progress-container" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-200">
+                    <!-- グラフがここに表示される -->
+                </div>
+            </div>
+            <!-- ▲▲▲ ここまで ▲▲▲ -->
             
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">苦手な単語 Top 5</h2>
@@ -452,6 +465,19 @@
                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
                     </label>
                 </div>
+                
+                <!-- ▼▼▼ 音声ミュートボタンを追加 ▼▼▼ -->
+                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <span id="mute-icon-in-settings" class="text-2xl mr-3 w-8 text-center"></span>
+                        <span class="font-semibold text-gray-800 dark:text-gray-200">音声読み上げ</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="mute-toggle-checkbox" onchange="toggleMute()" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
 
                 <button onclick="confirmDeleteAllData()" class="w-full flex items-center justify-center bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-200 font-bold py-3 px-4 rounded-lg hover:bg-red-200 dark:hover:bg-red-700 transition-colors">
                     <i class="fa-solid fa-trash-can mr-2"></i>
@@ -465,6 +491,10 @@
         const DEFAULT_PRIORITY = 10;
         let customDecks = JSON.parse(localStorage.getItem('customDecks') || '[]');
         
+        // ▼▼▼ 音声読み上げの状態を管理する変数を追加 ▼▼▼
+        let isMuted = localStorage.getItem('isMuted') === 'true';
+        // ▲▲▲ ここまで ▲▲▲
+
         customDecks.forEach(deck => {
             deck.words.forEach(word => {
                 if (word.priority === undefined) {
@@ -488,6 +518,10 @@
             document.getElementById('question-word').textContent = question.english;
             document.getElementById('progress-bar').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
             document.getElementById('quiz-progress-text').innerHTML = `問題 <span id="current-question">${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
+
+            // ▼▼▼ 問題表示時に単語を読み上げる ▼▼▼
+            speak(question.english);
+            // ▲▲▲ ここまで ▲▲▲
 
             const options = [question.japanese];
             const otherWords = allQuizWords.filter(w => w.japanese !== question.japanese);
@@ -644,6 +678,47 @@
             const deck = customDecks[deckId];
             document.getElementById('deck-menu-name').innerHTML = `<i class="fa-solid fa-file-pen mr-2"></i> ${deck.name}`;
             document.getElementById('start-quiz-from-menu-btn').onclick = () => startQuizFromDeck(deckId);
+            
+            // ▼▼▼ 進捗度グラフの描画処理を追加 ▼▼▼
+            const progressContainer = document.getElementById('deck-progress-container');
+            const words = deck.words;
+            if (words.length > 0) {
+                const totalProficiency = words.reduce((sum, word) => {
+                    const proficiency = Math.max(0, Math.min(100, (20 - (word.priority || DEFAULT_PRIORITY)) / 19 * 100));
+                    return sum + proficiency;
+                }, 0);
+                const averageProficiency = Math.round(totalProficiency / words.length);
+
+                const circumference = 2 * Math.PI * 50;
+                const offset = circumference - (averageProficiency / 100) * circumference;
+
+                progressContainer.innerHTML = `
+                    <div class="flex items-center justify-center">
+                        <div class="relative w-40 h-40">
+                            <svg viewBox="0 0 120 120" class="transform -rotate-90">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" class="text-gray-200 dark:text-gray-600" stroke-width="12"/>
+                                <circle id="deck-progress-circle" cx="60" cy="60" r="50" fill="none" stroke="currentColor" class="text-indigo-500" stroke-width="12" 
+                                        stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" stroke-linecap="round"
+                                        style="transition: stroke-dashoffset 1s ease-out;"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <p class="text-3xl font-bold text-gray-800">${averageProficiency}%</p>
+                                <p class="text-xs text-gray-500">達成度</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-4">このデッキの単語の習熟度です。</p>
+                `;
+                
+                setTimeout(() => {
+                    document.getElementById('deck-progress-circle').style.strokeDashoffset = offset;
+                }, 100);
+
+            } else {
+                progressContainer.innerHTML = '<p class="text-gray-400 text-center py-4">まだ単語がありません。</p>';
+            }
+            // ▲▲▲ ここまで ▲▲▲
+
             const highPriorityWordsContainer = document.getElementById('high-priority-words');
             highPriorityWordsContainer.innerHTML = '';
             const topWords = [...deck.words].sort((a, b) => b.priority - a.priority).filter(w => w.priority > DEFAULT_PRIORITY).slice(0, 5);
@@ -845,11 +920,9 @@
         }
 
         function updateDarkModeUI() {
-            const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
-            const body = document.body;
+            const isDarkMode = document.body.classList.contains('dark-mode');
             const iconInSettings = document.getElementById('dark-mode-icon-in-settings');
             const toggleCheckbox = document.getElementById('dark-mode-toggle-checkbox');
-            body.classList.toggle('dark-mode', isDarkMode);
             if(iconInSettings) iconInSettings.innerHTML = isDarkMode ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
             if(toggleCheckbox) toggleCheckbox.checked = isDarkMode;
         }
@@ -860,6 +933,7 @@
             settingsMenu.classList.remove('hidden'); settingsOverlay.classList.remove('hidden');
             setTimeout(() => settingsMenu.classList.remove('scale-95', 'opacity-0'), 10);
             updateDarkModeUI();
+            updateMuteUI(); // ミュートUIを更新
         }
 
         function closeSettingsMenu() {
@@ -877,7 +951,18 @@
             }
         }
 
-        window.addEventListener('load', () => { updateTotalWordsCount(); updateDarkModeUI(); });
+        window.addEventListener('load', () => {
+            // ▼▼▼ ダークモードのシステム設定対応を追加 ▼▼▼
+            const darkModeSetting = localStorage.getItem('darkMode');
+            if (darkModeSetting === 'enabled' || (darkModeSetting === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+            }
+            // ▲▲▲ ここまで ▲▲▲
+
+            updateTotalWordsCount();
+            updateDarkModeUI();
+            updateMuteUI(); // ページ読み込み時にミュートUIを初期化
+        });
 
         let currentFlashcardDeckId = null, flashcardList = [], currentFlashcardIndex = 0, wordVisibility = {};
 
@@ -935,6 +1020,9 @@
             document.getElementById('flashcard-japanese').textContent = word.japanese;
             document.getElementById('flashcard-progress').textContent = `${currentFlashcardIndex + 1} / ${flashcardList.length}`;
             document.getElementById('flashcard-inner').classList.remove('flipped');
+            // ▼▼▼ 単語カード表示時に読み上げ ▼▼▼
+            speak(word.english);
+            // ▲▲▲ ここまで ▲▲▲
         }
 
         function flipFlashcard() { if(flashcardList.length > 0) document.getElementById('flashcard-inner').classList.toggle('flipped'); }
@@ -968,13 +1056,33 @@
             updateFlashcardList(); currentFlashcardIndex = 0; showFlashcard();
         }
 
+        // ▼▼▼ 読み上げとミュート関連の関数群を追加 ▼▼▼
         function speak(text) {
-            if (!text || typeof speechSynthesis === 'undefined') return;
+            if (isMuted || !text || typeof speechSynthesis === 'undefined') return;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             speechSynthesis.cancel();
             speechSynthesis.speak(utterance);
         }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStorage.setItem('isMuted', isMuted);
+            updateMuteUI();
+        }
+        
+        function updateMuteUI() {
+            const iconInSettings = document.getElementById('mute-icon-in-settings');
+            const toggleCheckbox = document.getElementById('mute-toggle-checkbox');
+            if (toggleCheckbox) {
+                // チェックされているときが「音声オン」なので、isMutedとは逆の状態
+                toggleCheckbox.checked = !isMuted;
+            }
+            if (iconInSettings) {
+                iconInSettings.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+            }
+        }
+        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
