@@ -6,6 +6,9 @@
     <meta name="color-scheme" content="light dark">
     <title>俺的英単語アプリ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- ▼▼▼ 共有コード圧縮用のライブラリ(pako.js)を追加 ▼▼▼ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" integrity="sha512-g2TeAWw5GPnX7iGgEcIcKTFRIiBKRIM5Q_uABmQpCXNlnjtA94LOvPAqESb/sCgzNsCzLSdJXD7bvq8rVIMvYg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- ▲▲▲ ここまで ▲▲▲ -->
     <script>
       tailwind.config = {
         darkMode: ['class', '.dark-mode'],
@@ -348,7 +351,6 @@
                 </div>
             </div>
             
-            <!-- ▼▼▼ 「新規作成」タブの内容を共有機能に対応 ▼▼▼ -->
             <div id="deck-create-content" class="hidden">
                 <div id="deck-create-choice" class="space-y-4">
                     <button onclick="showCreateForm()" class="w-full bg-white border-2 border-blue-200 hover:border-blue-400 text-gray-800 font-bold py-8 px-6 rounded-2xl text-lg shadow-lg flex flex-col items-center justify-center">
@@ -400,7 +402,6 @@
                     </button>
                 </div>
             </div>
-            <!-- ▲▲▲ ここまで ▲▲▲ -->
         </div>
 
         <!-- 単語カードメニュー画面 -->
@@ -810,26 +811,26 @@
             customDecks.forEach((deck, index) => {
                 const deckCard = document.createElement('div');
                 deckCard.className = 'bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg';
+                // ▼▼▼ ボタンレイアウトを修正 ▼▼▼
                 deckCard.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <div class="flex-1 mr-4">
+                        <div class="flex-1 mr-2 sm:mr-4 min-w-0">
                             <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-1 truncate"><i class="fa-solid fa-book mr-2 text-gray-400"></i> ${deck.name}</h3>
                             <p class="text-xs sm:text-sm text-gray-600">${deck.words.length}語</p>
                         </div>
-                        <div class="flex space-x-2">
-                             <!-- ▼▼▼ 共有ボタンを追加 ▼▼▼ -->
-                            <button onclick="shareDeck(${index})" class="bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-600 dark:text-green-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="共有">
+                        <div class="flex space-x-1 sm:space-x-2">
+                            <button onclick="shareDeck(${index})" class="bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-600 dark:text-green-200 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="共有">
                                 <i class="fa-solid fa-share-from-square"></i>
                             </button>
-                            <!-- ▲▲▲ ここまで ▲▲▲ -->
-                            <button onclick="editDeck(${index})" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="編集">
+                            <button onclick="editDeck(${index})" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-200 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="編集">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
-                            <button onclick="deleteDeckFromManagement(${index})" class="bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-600 dark:text-red-200 w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="削除">
+                            <button onclick="deleteDeckFromManagement(${index})" class="bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-600 dark:text-red-200 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-lg flex items-center justify-center transition-colors" aria-label="削除">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </div>`;
+                // ▲▲▲ ここまで ▲▲▲
                 listContainer.appendChild(deckCard);
             });
         }
@@ -935,19 +936,16 @@
             allQuizWords = [...sourceWords];
             const numQuestions = Math.min(20, sourceWords.length);
             
-            // ▼▼▼ クイズの単語選出ロジックを改善 ▼▼▼
             let finalQuestions = [];
             const unseenWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) === DEFAULT_PRIORITY);
             const reviewWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) !== DEFAULT_PRIORITY);
 
-            // 1. 未学習の単語を優先的に選出 (全体の約30%)
             const numUnseenQuestions = Math.min(unseenWords.length, Math.ceil(numQuestions * 0.3));
             if (numUnseenQuestions > 0) {
                 const shuffledUnseen = unseenWords.sort(() => 0.5 - Math.random());
                 finalQuestions = shuffledUnseen.slice(0, numUnseenQuestions);
             }
             
-            // 2. 残りを復習単語から苦手度に応じて選出
             const remainingSlots = numQuestions - finalQuestions.length;
             if (remainingSlots > 0 && reviewWords.length > 0) {
                 const weightedPool = reviewWords.flatMap(word => Array(word.priority || DEFAULT_PRIORITY).fill(word));
@@ -956,7 +954,6 @@
                 const uniqueWordsFromPool = new Set();
                 for (const word of shuffledPool) {
                     if (uniqueWordsFromPool.size >= remainingSlots) break;
-                    // すでに選出された単語は追加しない
                     if (!finalQuestions.some(q => q.english === word.english)) {
                         uniqueWordsFromPool.add(word);
                     }
@@ -964,7 +961,6 @@
                 finalQuestions.push(...Array.from(uniqueWordsFromPool));
             }
 
-            // 3. もし単語数が足りなければ、残りの単語からランダムに追加
             if (finalQuestions.length < numQuestions) {
                 const existingEngWords = new Set(finalQuestions.map(w => w.english));
                 const remainingWords = sourceWords.filter(w => !existingEngWords.has(w.english))
@@ -972,7 +968,6 @@
                 const needed = numQuestions - finalQuestions.length;
                 finalQuestions.push(...remainingWords.slice(0, needed));
             }
-            // ▲▲▲ ここまで ▲▲▲
 
             quizQuestions = finalQuestions.sort(() => 0.5 - Math.random());
             currentQuestionIndex = 0;
@@ -1150,7 +1145,6 @@
             }
         }
         
-        // ▼▼▼ 共有とインポート関連の関数を追加 ▼▼▼
         function showCreateForm() {
             document.getElementById('deck-create-choice').classList.add('hidden');
             document.getElementById('deck-import-form').classList.add('hidden');
@@ -1165,14 +1159,17 @@
 
         function shareDeck(index) {
             const deckToShare = customDecks[index];
-            // 共有データにはpriorityを含めない
             const shareableDeck = {
                 name: deckToShare.name,
                 words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
             };
             try {
+                // ▼▼▼ pakoで圧縮して共有コードを短縮 ▼▼▼
                 const jsonString = JSON.stringify(shareableDeck);
-                const base64String = btoa(encodeURIComponent(jsonString));
+                const compressed = pako.deflate(jsonString, { to: 'string' });
+                const base64String = btoa(compressed);
+                // ▲▲▲ ここまで ▲▲▲
+
                 navigator.clipboard.writeText(base64String).then(() => {
                     alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
                 }, () => {
@@ -1191,10 +1188,12 @@
                 return;
             }
             try {
-                const jsonString = decodeURIComponent(atob(code));
+                // ▼▼▼ pakoで解凍してデッキを復元 ▼▼▼
+                const compressed = atob(code);
+                const jsonString = pako.inflate(compressed, { to: 'string' });
                 const importedData = JSON.parse(jsonString);
+                // ▲▲▲ ここまで ▲▲▲
 
-                // データのバリデーション
                 if (!importedData.name || typeof importedData.name !== 'string' || !Array.isArray(importedData.words)) {
                     throw new Error('Invalid deck format');
                 }
@@ -1204,14 +1203,13 @@
                     words: importedData.words.map(w => ({
                         english: w.english,
                         japanese: w.japanese,
-                        priority: DEFAULT_PRIORITY // priorityはデフォルト値で初期化
+                        priority: DEFAULT_PRIORITY
                     }))
                 };
 
                 customDecks.push(newDeck);
                 localStorage.setItem('customDecks', JSON.stringify(customDecks));
                 
-                // 新しいデッキの単語カード表示設定を初期化
                 const newDeckIndex = customDecks.length - 1;
                 const visibility = {};
                 newDeck.words.forEach((_, i) => visibility[i] = true);
@@ -1226,7 +1224,6 @@
                 console.error('Import error:', e);
             }
         }
-        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
