@@ -1152,7 +1152,8 @@
             document.getElementById('deck-create-form').classList.add('hidden');
             document.getElementById('deck-import-form').classList.remove('hidden');
         }
-
+        
+        // ▼▼▼ 共有・インポート関数を修正 ▼▼▼
         function shareDeck(index) {
             const deckToShare = customDecks[index];
             const shareableDeck = {
@@ -1160,25 +1161,29 @@
                 words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
             };
             try {
-                // ▼▼▼ 共有コード作成処理を修正 ▼▼▼
                 const jsonString = JSON.stringify(shareableDeck);
-                const textEncoder = new TextEncoder();
-                const utf8Bytes = textEncoder.encode(jsonString);
+                const utf8Bytes = new TextEncoder().encode(jsonString);
                 const compressed = pako.deflate(utf8Bytes);
 
-                let binaryString = '';
-                for (let i = 0; i < compressed.length; i++) {
-                    binaryString += String.fromCharCode(compressed[i]);
-                }
+                const blob = new Blob([compressed], { type: 'application/octet-stream' });
+                const reader = new FileReader();
                 
-                const base64String = btoa(binaryString);
-                // ▲▲▲ ここまで ▲▲▲
+                reader.onload = function(event) {
+                    const base64String = event.target.result.split(',')[1];
+                    navigator.clipboard.writeText(base64String).then(() => {
+                        alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
+                    }, () => {
+                        alert('クリップボードへのコピーに失敗しました。');
+                    });
+                };
 
-                navigator.clipboard.writeText(base64String).then(() => {
-                    alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
-                }, () => {
-                    alert('クリップボードへのコピーに失敗しました。');
-                });
+                reader.onerror = function() {
+                    alert('共有コードの作成に失敗しました。');
+                    console.error("FileReader error:", reader.error);
+                };
+                
+                reader.readAsDataURL(blob);
+
             } catch (e) {
                 alert('共有コードの作成に失敗しました。');
                 console.error("Share deck error:", e);
@@ -1192,20 +1197,16 @@
                 return;
             }
             try {
-                // ▼▼▼ インポート処理を修正 ▼▼▼
                 const binaryString = atob(code);
-
                 const compressed = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
                     compressed[i] = binaryString.charCodeAt(i);
                 }
 
                 const utf8Bytes = pako.inflate(compressed);
-                const textDecoder = new TextDecoder();
-                const jsonString = textDecoder.decode(utf8Bytes);
+                const jsonString = new TextDecoder().decode(utf8Bytes);
                 
                 const importedData = JSON.parse(jsonString);
-                // ▲▲▲ ここまで ▲▲▲
 
                 if (!importedData.name || typeof importedData.name !== 'string' || !Array.isArray(importedData.words)) {
                     throw new Error('Invalid deck format');
@@ -1237,6 +1238,7 @@
                 console.error('Import error:', e);
             }
         }
+        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
