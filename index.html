@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俺的英単語アプリ</title>
+    <script>
+      tailwind.config = {
+        darkMode: ['class', '.dark-mode'],
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        /* ダークモード */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+        .dark-mode .bg-white {
+            background-color: #2d3748 !important;
+        }
+        .dark-mode .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+        .dark-mode .text-gray-600 {
+            color: #cbd5e0 !important;
+        }
+        .dark-mode .text-gray-500 {
+            color: #a0aec0 !important;
+        }
+        .dark-mode .border-gray-200 {
+            border-color: #4a5568 !important;
+        }
+        .dark-mode .border-gray-300 {
+            border-color: #4a5568 !important;
+        }
+        .dark-mode .bg-gray-50 {
+            background-color: #374151 !important;
+        }
+        .dark-mode .bg-blue-50 {
+            background-color: #1e3a5f !important;
+        }
+        .dark-mode .bg-red-50 {
+            background-color: #5f1e1e !important;
+        }
+        .dark-mode .border-blue-200 {
+            border-color: #2563eb !important;
+        }
+        .dark-mode .border-red-200 {
+            border-color: #dc2626 !important;
+        }
+        
+        /* 単語カードのアニメーション */
+        .flashcard {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+        
+        /* サイドメニュー */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .side-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .side-menu-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .dark-mode .side-menu {
+            background: #2d3748;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen transition-colors duration-300">
+    <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-2xl">
+        <!-- タイトル画面 -->
+        <div id="title-screen" class="fade-in">
+            <!-- 設定ボタン -->
+            <div class="flex justify-end mb-4">
+                <button onclick="openSettingsMenu()" id="settings-btn" class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-full p-3 shadow-lg hover:shadow-xl transition-all">
+                    <span class="text-2xl">⚙️</span>
+                </button>
+            </div>
+            
+            <div class="text-center py-6 sm:py-12">
+                <div class="mb-6 sm:mb-8">
+                    <div class="inline-block gradient-bg text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 shadow-lg">
+                        ✨ VOCABULARY MASTER
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-3 sm:mb-4 px-2">
+                        俺的英単語アプリ
+                    </h1>
+                    <p class="text-gray-600 text-sm sm:text-base md:text-lg px-4">あなただけの英単語学習プラットフォーム</p>
+                </div>
+                
+                <div class="space-y-4 sm:space-y-6 max-w-md mx-auto mt-8 sm:mt-12">
+                    <button onclick="goToQuizMenu()" class="card-hover w-full bg-white border-2 border-indigo-200 hover:border-indigo-400 text-gray-800 font-bold py-4 sm:py-6 px-6 sm:px-8 rounded-2xl text-lg sm:text-xl shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl sm:text-3xl mr-3 sm:mr-4">📚</span>
+                                <span>問題を解く</span>
+                            </div>
+                            <span class="text-indigo-600">→</span>
+                        </div>
+                    </button>
+                    
+                    <button onclick="goToFlashcardMenu()" class="card-hover w-full bg-white border-2 border-purple-200 hover:border-purple-400 text-gray-800 font-bold py-4 sm:py-6 px-6 sm:px-8 rounded-2xl text-lg sm:text-xl shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl sm:text-3xl mr-3 sm:mr-4">🎴</span>
+                                <span>単語カード</span>
+                            </div>
+                            <span class="text-purple-600">→</span>
+                        </div>
+                    </button>
+                    
+                    <button onclick="goToCreateDeck()" class="card-hover w-full bg-white border-2 border-green-200 hover:border-green-400 text-gray-800 font-bold py-4 sm:py-6 px-6 sm:px-8 rounded-2xl text-lg sm:text-xl shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl sm:text-3xl mr-3 sm:mr-4">➕</span>
+                                <span>単語を追加する</span>
+                            </div>
+                            <span class="text-green-600">→</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="mt-12 text-gray-500 text-sm">
+                    <p id="total-words-count">登録単語数: 0語</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-4 sm:mb-6">
+                <div class="flex justify-between items-center">
+                    <button onclick="quitQuiz()" class="text-gray-600 hover:text-gray-800 text-sm sm:text-base">← 中断して戻る</button>
+                    <span id="quiz-progress-text" class="text-sm sm:text-lg text-gray-600">問題 <span id="current-question">1</span> / 20</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
+                    <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 5%"></div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-6 sm:p-8 mb-4 sm:mb-6 border border-gray-200">
+                <p class="text-xs sm:text-sm text-gray-500 mb-2">この英語の意味を選んでください</p>
+                <div class="flex items-center justify-center space-x-4">
+                    <h2 id="question-word" class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 text-center break-words"></h2>
+                    <button onclick="speak(document.getElementById('question-word').textContent)" class="text-2xl sm:text-3xl text-gray-500 hover:text-indigo-600 transition-colors">🔊</button>
+                </div>
+            </div>
+
+            <div id="options-container" class="space-y-2 sm:space-y-3">
+                <!-- 選択肢がここに表示されます -->
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">クイズ結果</h1>
+            
+            <!-- 円グラフ -->
+            <div class="flex justify-center mb-6">
+                <div class="relative w-48 h-48">
+                    <svg viewBox="0 0 200 200" class="transform -rotate-90">
+                        <circle cx="100" cy="100" r="80" fill="none" stroke="#fee2e2" stroke-width="40"/>
+                        <circle id="result-circle" cx="100" cy="100" r="80" fill="none" stroke="#22c55e" stroke-width="40" 
+                                stroke-dasharray="0 502.4" stroke-linecap="round"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <p class="text-4xl font-bold text-gray-800" id="score-percentage"></p>
+                        <p class="text-sm text-gray-600">正答率</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-lg p-6 mb-6 border border-blue-200">
+                <div class="flex justify-around text-center">
+                    <div>
+                        <p class="text-3xl font-bold text-green-600" id="correct-count"></p>
+                        <p class="text-sm text-gray-600">正解</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-red-600" id="incorrect-count"></p>
+                        <p class="text-sm text-gray-600">不正解</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mistakes-container" class="mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">間違えた問題</h2>
+                <div id="mistakes-list" class="space-y-3">
+                    <!-- 間違えた問題がここに表示されます -->
+                </div>
+            </div>
+
+            <button onclick="restartQuiz()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors mb-4">
+                もう一度挑戦する
+            </button>
+            <button onclick="restartWithMistakes()" id="restart-mistakes-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg transition-colors mb-4 hidden">
+                間違えた問題だけ復習する
+            </button>
+            <button onclick="backToTitle()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors">
+                タイトルに戻る
+            </button>
+        </div>
+
+        <!-- スタート画面 -->
+        <div id="start-screen" class="hidden">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">英単語クイズ</h1>
+                <p class="text-gray-600 mb-8">20問の英単語クイズに挑戦しましょう！<br>英語を見て、正しい日本語の意味を選んでください。</p>
+                <button onclick="startQuiz()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors">
+                    クイズを始める
+                </button>
+                <button onclick="backToTitle()" class="mt-4 text-gray-600 hover:text-gray-800 underline">
+                    タイトルに戻る
+                </button>
+            </div>
+        </div>
+
+        <!-- クイズメニュー画面 -->
+        <div id="quiz-menu-screen" class="hidden">
+            <div class="mb-4 sm:mb-6">
+                <button onclick="backToTitle()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← タイトルに戻る</button>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">問題を選ぶ</h1>
+                <p class="text-sm sm:text-base text-gray-600">学習したい問題カードを選んでください</p>
+            </div>
+            
+            <div id="deck-list" class="space-y-3 sm:space-y-4">
+                <!-- カスタムデッキがここに追加されます -->
+            </div>
+        </div>
+
+        <!-- デッキ詳細メニュー画面 -->
+        <div id="deck-menu-detail-screen" class="hidden">
+            <div class="mb-4 sm:mb-6">
+                <button onclick="goToQuizMenu()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← 問題を選ぶに戻る</button>
+                <h1 id="deck-menu-name" class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2"></h1>
+                <p class="text-sm sm:text-base text-gray-600">デッキ情報と学習開始</p>
+            </div>
+            
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">苦手な単語 Top 5</h2>
+                <div id="high-priority-words" class="space-y-3">
+                    <!-- 苦手な単語がここに表示されます -->
+                </div>
+            </div>
+            
+            <button id="start-quiz-from-menu-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors shadow-lg">
+                このデッキで問題を始める
+            </button>
+        </div>
+
+        <!-- 単語追加画面（デッキ管理） -->
+        <div id="create-deck-screen" class="hidden">
+            <div class="mb-4 sm:mb-6">
+                <button onclick="backToTitle()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← タイトルに戻る</button>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">単語デッキ管理</h1>
+                <p class="text-sm sm:text-base text-gray-600">デッキの作成・編集・削除ができます</p>
+            </div>
+
+            <!-- タブ切り替え -->
+            <div class="flex mb-6 border-b-2 border-gray-200">
+                <button id="deck-list-tab" onclick="switchTab('list')" class="flex-1 py-3 font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors">
+                    デッキ一覧
+                </button>
+                <button id="deck-create-tab" onclick="switchTab('create')" class="flex-1 py-3 font-bold text-gray-400 border-b-2 border-transparent transition-colors">
+                    新規作成
+                </button>
+            </div>
+
+            <!-- デッキ一覧タブ -->
+            <div id="deck-list-content" class="space-y-4">
+                <div id="deck-management-list">
+                    <!-- デッキ一覧がここに表示されます -->
+                </div>
+            </div>
+
+            <!-- 新規作成タブ -->
+            <div id="deck-create-content" class="hidden">
+                <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
+                    <div class="mb-4 sm:mb-6">
+                        <label class="block text-gray-700 font-bold mb-2 text-sm sm:text-base">デッキ名</label>
+                        <input type="text" id="deck-name" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="例: TOEIC頻出単語">
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-gray-800 text-sm sm:text-base">単語リスト</h3>
+                            <input type="text" id="deck-word-search" class="px-3 py-1 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm" placeholder="単語を検索...">
+                        </div>
+                        <div id="deck-words-list" class="space-y-2 mb-4 max-h-48 sm:max-h-60 overflow-y-auto">
+                            <!-- 追加された単語がここに表示されます -->
+                        </div>
+                    </div>
+
+                    <div class="border-t-2 border-gray-200 pt-4">
+                        <h4 class="font-semibold text-gray-700 mb-3 text-sm sm:text-base">単語を追加</h4>
+                        <div class="mb-3">
+                            <input type="text" id="word-english" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-2 text-sm sm:text-base" placeholder="英単語">
+                            <input type="text" id="word-japanese" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="日本語の意味">
+                        </div>
+                        <button onclick="addWordToDeck()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm sm:text-base">
+                            + 単語を追加
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="saveDeck()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors shadow-lg mb-3 text-sm sm:text-base">
+                    💾 デッキを保存
+                </button>
+            </div>
+        </div>
+
+        <!-- 単語カードメニュー画面 -->
+        <div id="flashcard-menu-screen" class="hidden">
+            <div class="mb-4 sm:mb-6">
+                <button onclick="backToTitle()" class="text-gray-600 hover:text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">← タイトルに戻る</button>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">単語カードを選ぶ</h1>
+                <p class="text-sm sm:text-base text-gray-600">復習したい単語カードを選んでください</p>
+            </div>
+            
+            <div id="flashcard-deck-list" class="space-y-3 sm:space-y-4">
+                <!-- デッキがここに追加されます -->
+            </div>
+        </div>
+
+        <!-- 単語カード表示画面 -->
+        <div id="flashcard-screen" class="hidden">
+            <!-- サイドメニューオーバーレイ -->
+            <div id="side-menu-overlay" class="side-menu-overlay" onclick="closeSideMenu()"></div>
+            
+            <!-- サイドメニュー -->
+            <div id="side-menu" class="side-menu">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">単語を選択</h2>
+                        <button onclick="closeSideMenu()" class="text-gray-600 hover:text-gray-800 text-2xl">×</button>
+                    </div>
+                    <div id="word-selection-list" class="space-y-2">
+                        <!-- チェックボックスリストがここに表示されます -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ヘッダー -->
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="backToFlashcardMenu()" class="text-gray-600 hover:text-gray-800 text-sm sm:text-base">← 戻る</button>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm sm:text-base text-gray-600" id="flashcard-progress">1 / 10</span>
+                    <button onclick="openSideMenu()" class="bg-white border-2 border-gray-200 rounded-lg px-3 py-2 hover:border-gray-400 transition-all">
+                        ⚙️ 設定
+                    </button>
+                </div>
+            </div>
+
+            <!-- 単語カード -->
+            <div class="flashcard mb-6" style="height: 400px;">
+                <div id="flashcard-inner" class="flashcard-inner">
+                    <div class="flashcard-front bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl">
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <h2 id="flashcard-english" class="text-4xl sm:text-5xl font-bold text-white text-center break-words px-12"></h2>
+                            <button onclick="event.stopPropagation(); speak(document.getElementById('flashcard-english').textContent)" class="absolute bottom-4 right-4 text-3xl text-white opacity-70 hover:opacity-100 transition-opacity">🔊</button>
+                        </div>
+                    </div>
+                    <div class="flashcard-back bg-gradient-to-br from-green-500 to-teal-600 shadow-2xl">
+                        <h2 id="flashcard-japanese" class="text-3xl sm:text-4xl font-bold text-white text-center break-words"></h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- コントロールボタン -->
+            <div class="grid grid-cols-3 gap-4">
+                <button onclick="previousFlashcard()" class="bg-white border-2 border-gray-300 hover:border-indigo-400 text-gray-800 font-bold py-4 px-6 rounded-lg transition-all">
+                    ← 前へ
+                </button>
+                <button onclick="flipFlashcard()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-all">
+                    裏返す
+                </button>
+                <button onclick="nextFlashcard()" class="bg-white border-2 border-gray-300 hover:border-indigo-400 text-gray-800 font-bold py-4 px-6 rounded-lg transition-all">
+                    次へ →
+                </button>
+            </div>
+        </div>
+
+        <!-- 設定モーダル -->
+        <div id="settings-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closeSettingsMenu()"></div>
+        <div id="settings-menu" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 z-50 hidden transform scale-95 opacity-0 transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">設定</h2>
+                <button onclick="closeSettingsMenu()" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <span id="dark-mode-icon-in-settings" class="text-2xl mr-3"></span>
+                        <span class="font-semibold text-gray-800">ダークモード</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="dark-mode-toggle-checkbox" onchange="toggleDarkMode()" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <button onclick="confirmDeleteAllData()" class="w-full flex items-center justify-center bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-200 font-bold py-3 px-4 rounded-lg hover:bg-red-200 dark:hover:bg-red-700 transition-colors">
+                    <span class="text-xl mr-2">🗑️</span>
+                    全てのデータを削除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_PRIORITY = 10;
+        let customDecks = JSON.parse(localStorage.getItem('customDecks') || '[]');
+        
+        // Migrate old data to include priority
+        customDecks.forEach(deck => {
+            deck.words.forEach(word => {
+                if (word.priority === undefined) {
+                    word.priority = DEFAULT_PRIORITY;
+                }
+            });
+        });
+
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let allQuizWords = [];
+        let lastPlayedDeckId = -1;
+
+        function startQuiz() {
+            // This function is not reachable from the UI.
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) return;
+            const question = quizQuestions[currentQuestionIndex];
+            const totalQuestions = quizQuestions.length;
+
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('question-word').textContent = question.english;
+            document.getElementById('progress-bar').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+            document.getElementById('quiz-progress-text').innerHTML = `問題 <span id="current-question">${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
+
+
+            // Generate options (1 correct + 3 incorrect)
+            const options = [question.japanese];
+            const otherWords = allQuizWords.filter(w => w.japanese !== question.japanese);
+            
+            const incorrectOptions = new Set();
+            while (incorrectOptions.size < 3 && otherWords.length > 0) {
+                const randomWord = otherWords[Math.floor(Math.random() * otherWords.length)];
+                if (!options.includes(randomWord.japanese)) {
+                    incorrectOptions.add(randomWord.japanese);
+                }
+                if (options.length + incorrectOptions.size >= allQuizWords.length) break;
+            }
+            options.push(...incorrectOptions);
+            options.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-4 rounded-lg border-2 border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option, button);
+                container.appendChild(button);
+            });
+
+            selectedAnswer = null;
+        }
+
+        let selectedAnswer = null;
+
+        function selectAnswer(answer, button) {
+            if (selectedAnswer !== null) return;
+
+            selectedAnswer = answer;
+            const question = quizQuestions[currentQuestionIndex];
+            const isCorrect = answer === question.japanese;
+
+            userAnswers.push({
+                question: question,
+                userAnswer: answer,
+                isCorrect: isCorrect
+            });
+
+            const allButtons = document.querySelectorAll('#options-container button');
+            
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === question.japanese) {
+                    btn.classList.remove('border-gray-300', 'hover:border-blue-400', 'hover:bg-blue-50');
+                    btn.classList.add('border-green-500', 'bg-green-100');
+                }
+                else if (btn === button && !isCorrect) {
+                    btn.classList.remove('border-gray-300', 'hover:border-blue-400', 'hover:bg-blue-50');
+                    btn.classList.add('border-red-500', 'bg-red-100');
+                }
+            });
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizQuestions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const totalQuestions = quizQuestions.length;
+            const correctAnswers = userAnswers.filter(a => a.isCorrect).length;
+            const incorrectAnswers = totalQuestions - correctAnswers;
+            const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+            document.getElementById('score-percentage').textContent = percentage + '%';
+            document.getElementById('correct-count').textContent = correctAnswers;
+            document.getElementById('incorrect-count').textContent = incorrectAnswers;
+
+            if (lastPlayedDeckId !== -1) {
+                const deck = customDecks[lastPlayedDeckId];
+                userAnswers.forEach(answer => {
+                    const wordToUpdate = deck.words.find(w => w.english === answer.question.english && w.japanese === answer.question.japanese);
+                    if (wordToUpdate) {
+                        if (answer.isCorrect) {
+                            wordToUpdate.priority = Math.max(1, wordToUpdate.priority - 1);
+                        } else {
+                            wordToUpdate.priority += 2; // Increase more for incorrect answers
+                        }
+                    }
+                });
+                localStorage.setItem('customDecks', JSON.stringify(customDecks));
+            }
+
+            const circumference = 2 * Math.PI * 80;
+            const offset = circumference - (percentage / 100) * circumference;
+            const circle = document.getElementById('result-circle');
+            
+            setTimeout(() => {
+                circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                circle.style.strokeDashoffset = offset;
+                circle.style.transition = 'stroke-dashoffset 1s ease-out';
+            }, 100);
+
+            const mistakesList = document.getElementById('mistakes-list');
+            const mistakes = userAnswers.filter(a => !a.isCorrect);
+            const restartMistakesButton = document.getElementById('restart-mistakes-button');
+
+            if (mistakes.length === 0) {
+                mistakesList.innerHTML = '<p class="text-green-600 font-bold text-center py-4">全問正解です！おめでとうございます！🎉</p>';
+                restartMistakesButton.classList.add('hidden');
+            } else {
+                restartMistakesButton.classList.remove('hidden');
+                mistakesList.innerHTML = '';
+                mistakes.forEach(mistake => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-red-50 border border-red-200 rounded-lg p-4';
+                    div.innerHTML = `
+                        <div class="font-bold text-gray-800 mb-1">${mistake.question.english}</div>
+                        <div class="text-sm text-gray-600">
+                            <span class="text-green-600">正解: ${mistake.question.japanese}</span><br>
+                            <span class="text-red-600">あなたの解答: ${mistake.userAnswer}</span>
+                        </div>
+                    `;
+                    mistakesList.appendChild(div);
+                });
+            }
+        }
+
+        function restartWithMistakes() {
+            const mistakes = userAnswers.filter(a => !a.isCorrect).map(a => a.question);
+            if (mistakes.length === 0) return;
+            
+            quizQuestions = [...mistakes].sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            userAnswers = [];
+
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function restartQuiz() {
+            if (lastPlayedDeckId !== -1) {
+                document.getElementById('result-screen').classList.add('hidden');
+                goToDeckMenu(lastPlayedDeckId);
+            } else {
+                backToTitle();
+            }
+        }
+
+        function backToTitle() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-menu-screen').classList.add('hidden');
+            document.getElementById('create-deck-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('flashcard-menu-screen').classList.add('hidden');
+            document.getElementById('flashcard-screen').classList.add('hidden');
+            document.getElementById('deck-menu-detail-screen').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            updateTotalWordsCount();
+        }
+
+        let currentDeckWords = [];
+        let editingDeckIndex = -1;
+        let isEditingMode = false;
+
+        function goToQuizMenu() {
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('deck-menu-detail-screen').classList.add('hidden');
+            document.getElementById('quiz-menu-screen').classList.remove('hidden');
+            renderDeckList();
+        }
+
+        function goToDeckMenu(deckId) {
+            document.getElementById('quiz-menu-screen').classList.add('hidden');
+            document.getElementById('deck-menu-detail-screen').classList.remove('hidden');
+
+            const deck = customDecks[deckId];
+            document.getElementById('deck-menu-name').textContent = `📝 ${deck.name}`;
+            
+            const startBtn = document.getElementById('start-quiz-from-menu-btn');
+            startBtn.onclick = () => startQuizFromDeck(deckId);
+
+            const highPriorityWordsContainer = document.getElementById('high-priority-words');
+            highPriorityWordsContainer.innerHTML = '';
+            
+            const sortedWords = [...deck.words].sort((a, b) => b.priority - a.priority);
+            const topWords = sortedWords.filter(w => w.priority > DEFAULT_PRIORITY).slice(0, 5);
+            
+            if (topWords.length === 0) {
+                highPriorityWordsContainer.innerHTML = '<p class="text-gray-400 text-center py-4">素晴らしい！特に苦手な単語はありません。</p>';
+            } else {
+                 topWords.forEach(word => {
+                    const wordDiv = document.createElement('div');
+                    wordDiv.className = 'bg-orange-50 border border-orange-200 rounded-lg p-3';
+                    const priorityBar = `
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+                            <div class="bg-orange-400 h-2 rounded-full" style="width: ${Math.min(100, (word.priority / 20) * 100)}%"></div>
+                        </div>
+                    `;
+
+                    wordDiv.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-gray-800">${word.english}</div>
+                                <div class="text-sm text-gray-600">${word.japanese}</div>
+                            </div>
+                            <div class="text-xs text-orange-600 font-semibold">
+                                苦手度: ${word.priority}
+                            </div>
+                        </div>
+                        ${priorityBar}
+                    `;
+                    highPriorityWordsContainer.appendChild(wordDiv);
+                 });
+            }
+        }
+
+        function goToCreateDeck() {
+            isEditingMode = false;
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('create-deck-screen').classList.remove('hidden');
+            switchTab('list');
+            renderDeckManagementList();
+        }
+
+        function switchTab(tab) {
+            const listTab = document.getElementById('deck-list-tab');
+            const createTab = document.getElementById('deck-create-tab');
+            const listContent = document.getElementById('deck-list-content');
+            const createContent = document.getElementById('deck-create-content');
+
+            if (tab === 'list') {
+                listTab.classList.add('text-indigo-600', 'border-indigo-600');
+                listTab.classList.remove('text-gray-400', 'border-transparent');
+                createTab.classList.add('text-gray-400', 'border-transparent');
+                createTab.classList.remove('text-indigo-600', 'border-indigo-600');
+                listContent.classList.remove('hidden');
+                createContent.classList.add('hidden');
+                createTab.textContent = '新規作成';
+                renderDeckManagementList();
+            } else {
+                createTab.classList.add('text-indigo-600', 'border-indigo-600');
+                createTab.classList.remove('text-gray-400', 'border-transparent');
+                listTab.classList.add('text-gray-400', 'border-transparent');
+                listTab.classList.remove('text-indigo-600', 'border-indigo-600');
+                createContent.classList.remove('hidden');
+                listContent.classList.add('hidden');
+                
+                if (isEditingMode) {
+                    createTab.textContent = 'デッキ編集';
+                } else {
+                    createTab.textContent = '新規作成';
+                    editingDeckIndex = -1;
+                    currentDeckWords = [];
+                    document.getElementById('deck-name').value = '';
+                    document.getElementById('word-english').value = '';
+                    document.getElementById('word-japanese').value = '';
+                }
+                document.getElementById('deck-word-search').value = '';
+                renderDeckWordsList();
+                
+                const searchInput = document.getElementById('deck-word-search');
+                searchInput.oninput = () => {
+                    renderDeckWordsList(searchInput.value);
+                };
+            }
+        }
+
+        function renderDeckManagementList() {
+            const listContainer = document.getElementById('deck-management-list');
+            listContainer.innerHTML = '';
+            if (customDecks.length === 0) {
+                listContainer.innerHTML = '<p class="text-gray-400 text-center py-8">まだデッキが作成されていません<br><span class="text-sm">「新規作成」タブから新しいデッキを作成しましょう</span></p>';
+                return;
+            }
+
+            customDecks.forEach((deck, index) => {
+                const deckCard = document.createElement('div');
+                deckCard.className = 'bg-white border-2 border-gray-200 rounded-2xl p-4 sm:p-6 shadow-lg';
+                deckCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-1">📚 ${deck.name}</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">${deck.words.length}語</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="editDeck(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                                ✏️ 編集
+                            </button>
+                            <button onclick="deleteDeckFromManagement(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                                🗑️ 削除
+                            </button>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(deckCard);
+            });
+        }
+
+        function editDeck(index) {
+            isEditingMode = true;
+            editingDeckIndex = index;
+            const deck = customDecks[index];
+            currentDeckWords = deck.words.map(word => ({ ...word }));
+            document.getElementById('deck-name').value = deck.name;
+            switchTab('create');
+        }
+
+        function deleteDeckFromManagement(index) {
+            if (confirm('このデッキを削除しますか？\n単語カードの設定も削除されます。')) {
+                localStorage.removeItem(`wordVisibility_${index}`);
+                customDecks.splice(index, 1);
+                localStorage.setItem('customDecks', JSON.stringify(customDecks));
+                renderDeckManagementList();
+                updateTotalWordsCount();
+            }
+        }
+
+        function renderDeckList() {
+            const deckListContainer = document.getElementById('deck-list');
+            deckListContainer.innerHTML = '';
+
+            if (customDecks.length === 0) {
+                deckListContainer.innerHTML = '<p class="text-gray-400 text-center py-8">まだ問題カードが作成されていません<br><span class="text-sm">「単語を追加する」から新しいデッキを作成しましょう</span></p>';
+                return;
+            }
+
+            customDecks.forEach((deck, index) => {
+                const deckCard = document.createElement('div');
+                deckCard.className = 'card-hover bg-white border-2 border-green-200 rounded-2xl p-6 shadow-lg cursor-pointer';
+                deckCard.onclick = () => goToDeckMenu(index);
+                deckCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-1">📝 ${deck.name}</h3>
+                            <p class="text-sm text-gray-600">カスタム単語帳</p>
+                        </div>
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">${deck.words.length}語</span>
+                    </div>
+                    <div class="text-indigo-600 font-semibold text-sm">デッキメニューを開く →</div>
+                `;
+                deckListContainer.appendChild(deckCard);
+            });
+        }
+
+        function addWordToDeck() {
+            const english = document.getElementById('word-english').value.trim();
+            const japanese = document.getElementById('word-japanese').value.trim();
+
+            if (!english || !japanese) {
+                alert('英単語と日本語の意味を両方入力してください。');
+                return;
+            }
+
+            currentDeckWords.push({ english, japanese, priority: DEFAULT_PRIORITY });
+            document.getElementById('word-english').value = '';
+            document.getElementById('word-japanese').value = '';
+            document.getElementById('word-english').focus();
+            renderDeckWordsList();
+        }
+
+        function renderDeckWordsList(searchTerm = '') {
+            const listContainer = document.getElementById('deck-words-list');
+            listContainer.innerHTML = '';
+            
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            const filteredWords = currentDeckWords.filter(word => 
+                word.english.toLowerCase().includes(lowerCaseSearchTerm) ||
+                word.japanese.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+
+            if (filteredWords.length === 0) {
+                if (searchTerm) {
+                    listContainer.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">「${searchTerm}」に一致する単語はありません</p>`;
+                } else {
+                    listContainer.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">まだ単語が追加されていません</p>';
+                }
+                return;
+            }
+
+            filteredWords.forEach(word => {
+                const originalIndex = currentDeckWords.findIndex(w => w.english === word.english && w.japanese === word.japanese);
+                const wordDiv = document.createElement('div');
+                wordDiv.className = 'flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg';
+                wordDiv.innerHTML = `
+                    <div>
+                        <span class="font-semibold text-gray-800">${word.english}</span>
+                        <span class="text-gray-600 text-sm ml-2">- ${word.japanese}</span>
+                    </div>
+                    <button onclick="removeWordFromDeck(${originalIndex})" class="text-red-500 hover:text-red-700 text-sm">✕</button>
+                `;
+                listContainer.appendChild(wordDiv);
+            });
+        }
+
+        function removeWordFromDeck(index) {
+            currentDeckWords.splice(index, 1);
+            renderDeckWordsList();
+        }
+
+        function saveDeck() {
+            const deckName = document.getElementById('deck-name').value.trim();
+
+            if (!deckName) {
+                alert('デッキ名を入力してください。');
+                return;
+            }
+
+            if (currentDeckWords.length < 4) {
+                alert('最低4つの単語を追加してください（クイズに必要です）。');
+                return;
+            }
+
+            const newDeck = { name: deckName, words: currentDeckWords };
+
+            if (editingDeckIndex >= 0) {
+                customDecks[editingDeckIndex] = newDeck;
+                alert(`「${deckName}」を更新しました！`);
+                // Ensure new words are visible by default
+                const visibility = JSON.parse(localStorage.getItem(`wordVisibility_${editingDeckIndex}`) || '{}');
+                newDeck.words.forEach((_, i) => {
+                    if(visibility[i] === undefined) visibility[i] = true;
+                });
+                localStorage.setItem(`wordVisibility_${editingDeckIndex}`, JSON.stringify(visibility));
+            } else {
+                customDecks.push(newDeck);
+                const newDeckIndex = customDecks.length - 1;
+                const visibility = {};
+                newDeck.words.forEach((_, i) => {
+                    visibility[i] = true;
+                });
+                localStorage.setItem(`wordVisibility_${newDeckIndex}`, JSON.stringify(visibility));
+                alert(`「${deckName}」を保存しました！`);
+            }
+
+            localStorage.setItem('customDecks', JSON.stringify(customDecks));
+            editingDeckIndex = -1;
+            isEditingMode = false;
+            backToTitle();
+        }
+
+        function quitQuiz() {
+            if (confirm('クイズを中断しますか？\n現在の進捗は保存されません。')) {
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('quiz-menu-screen').classList.remove('hidden');
+                quizQuestions = [];
+                currentQuestionIndex = 0;
+                userAnswers = [];
+                allQuizWords = [];
+                lastPlayedDeckId = -1;
+            }
+        }
+
+        function startQuizFromDeck(deckId) {
+            lastPlayedDeckId = deckId;
+            const sourceWords = customDecks[deckId].words;
+
+            if (sourceWords.length < 4) {
+                alert('このデッキには単語が足りません（最低4語必要です）。');
+                return;
+            }
+            
+            allQuizWords = [...sourceWords];
+            const numQuestions = Math.min(20, sourceWords.length);
+
+            const weightedPool = [];
+            sourceWords.forEach(word => {
+                for (let i = 0; i < (word.priority || DEFAULT_PRIORITY); i++) {
+                    weightedPool.push(word);
+                }
+            });
+            
+            const shuffledPool = weightedPool.sort(() => Math.random() - 0.5);
+            
+            const uniqueQuestions = new Set();
+            const finalQuestions = [];
+
+            for (const word of shuffledPool) {
+                if (finalQuestions.length >= numQuestions) break;
+                if (!uniqueQuestions.has(word.english)) {
+                    uniqueQuestions.add(word.english);
+                    finalQuestions.push(word);
+                }
+            }
+            
+            if (finalQuestions.length < numQuestions) {
+                 const remainingWords = sourceWords.filter(w => !uniqueQuestions.has(w.english));
+                 remainingWords.sort(() => Math.random() - 0.5);
+                 while(finalQuestions.length < numQuestions && remainingWords.length > 0) {
+                     finalQuestions.push(remainingWords.pop());
+                 }
+            }
+            
+            quizQuestions = finalQuestions;
+            currentQuestionIndex = 0;
+            userAnswers = [];
+
+            document.getElementById('deck-menu-detail-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function updateTotalWordsCount() {
+            const totalWords = customDecks.reduce((sum, deck) => sum + deck.words.length, 0);
+            document.getElementById('total-words-count').textContent = `登録単語数: ${totalWords}語`;
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+            updateDarkModeUI();
+        }
+
+        function updateDarkModeUI() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+            const body = document.body;
+            const iconInSettings = document.getElementById('dark-mode-icon-in-settings');
+            const toggleCheckbox = document.getElementById('dark-mode-toggle-checkbox');
+
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                if(iconInSettings) iconInSettings.textContent = '☀️';
+                if(toggleCheckbox) toggleCheckbox.checked = true;
+            } else {
+                body.classList.remove('dark-mode');
+                if(iconInSettings) iconInSettings.textContent = '🌙';
+                if(toggleCheckbox) toggleCheckbox.checked = false;
+            }
+        }
+
+        function openSettingsMenu() {
+            const settingsMenu = document.getElementById('settings-menu');
+            const settingsOverlay = document.getElementById('settings-overlay');
+            settingsMenu.classList.remove('hidden');
+            settingsOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                settingsMenu.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            updateDarkModeUI();
+        }
+
+        function closeSettingsMenu() {
+            const settingsMenu = document.getElementById('settings-menu');
+            const settingsOverlay = document.getElementById('settings-overlay');
+            settingsMenu.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                settingsMenu.classList.add('hidden');
+                settingsOverlay.classList.add('hidden');
+            }, 200);
+        }
+
+        function confirmDeleteAllData() {
+            if (confirm('本当に全てのデータを削除しますか？\nこの操作は元に戻せません。')) {
+                localStorage.clear();
+                customDecks = [];
+                alert('全てのデータが削除されました。ページをリロードします。');
+                location.reload();
+            }
+        }
+
+        window.addEventListener('load', () => {
+            updateTotalWordsCount();
+            updateDarkModeUI();
+        });
+
+        let currentFlashcardDeckId = null;
+        let flashcardList = [];
+        let currentFlashcardIndex = 0;
+        let wordVisibility = {};
+
+        function goToFlashcardMenu() {
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('flashcard-menu-screen').classList.remove('hidden');
+            renderFlashcardDeckList();
+        }
+
+        function renderFlashcardDeckList() {
+            const deckListContainer = document.getElementById('flashcard-deck-list');
+            deckListContainer.innerHTML = '';
+
+            if (customDecks.length === 0) {
+                deckListContainer.innerHTML = '<p class="text-gray-400 text-center py-8">まだ単語カードが作成されていません<br><span class="text-sm">「単語を追加する」から新しいデッキを作成しましょう</span></p>';
+                return;
+            }
+
+            customDecks.forEach((deck, index) => {
+                const deckCard = document.createElement('div');
+                deckCard.className = 'card-hover bg-white border-2 border-purple-200 rounded-2xl p-6 shadow-lg cursor-pointer';
+                deckCard.onclick = () => startFlashcards(index);
+                deckCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-1">🎴 ${deck.name}</h3>
+                            <p class="text-sm text-gray-600">カスタム単語帳</p>
+                        </div>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">${deck.words.length}語</span>
+                    </div>
+                    <div class="text-purple-600 font-semibold text-sm">カードを開く →</div>
+                `;
+                deckListContainer.appendChild(deckCard);
+            });
+        }
+
+        function startFlashcards(deckId) {
+            currentFlashcardDeckId = deckId;
+            const deck = customDecks[deckId];
+            
+            const savedVisibility = localStorage.getItem(`wordVisibility_${deckId}`);
+            if (savedVisibility) {
+                wordVisibility = JSON.parse(savedVisibility);
+            } else {
+                wordVisibility = {};
+                deck.words.forEach((_, index) => {
+                    wordVisibility[index] = true;
+                });
+            }
+
+            updateFlashcardList();
+
+            if (flashcardList.length === 0) {
+                alert('表示する単語がありません。設定から単語を選択してください。');
+                return;
+            }
+
+            currentFlashcardIndex = 0;
+
+            document.getElementById('flashcard-menu-screen').classList.add('hidden');
+            document.getElementById('flashcard-screen').classList.remove('hidden');
+            
+            showFlashcard();
+        }
+
+        function updateFlashcardList() {
+            const deck = customDecks[currentFlashcardDeckId];
+            flashcardList = deck.words
+                .map((word, index) => ({ ...word, originalIndex: index }))
+                .filter(word => wordVisibility[word.originalIndex]);
+            flashcardList.sort(() => Math.random() - 0.5);
+        }
+
+        function showFlashcard() {
+            if (flashcardList.length === 0) {
+                document.getElementById('flashcard-english').textContent = '単語なし';
+                document.getElementById('flashcard-japanese').textContent = '単語を追加してください';
+                document.getElementById('flashcard-progress').textContent = `0 / 0`;
+                return;
+            }
+
+            const word = flashcardList[currentFlashcardIndex];
+            document.getElementById('flashcard-english').textContent = word.english;
+            document.getElementById('flashcard-japanese').textContent = word.japanese;
+            document.getElementById('flashcard-progress').textContent = `${currentFlashcardIndex + 1} / ${flashcardList.length}`;
+            
+            document.getElementById('flashcard-inner').classList.remove('flipped');
+        }
+
+        function flipFlashcard() {
+            if(flashcardList.length > 0) {
+                document.getElementById('flashcard-inner').classList.toggle('flipped');
+            }
+        }
+
+        function nextFlashcard() {
+            if (flashcardList.length === 0) return;
+            currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardList.length;
+            showFlashcard();
+        }
+
+        function previousFlashcard() {
+            if (flashcardList.length === 0) return;
+            currentFlashcardIndex = (currentFlashcardIndex - 1 + flashcardList.length) % flashcardList.length;
+            showFlashcard();
+        }
+
+        function backToFlashcardMenu() {
+            document.getElementById('flashcard-screen').classList.add('hidden');
+            document.getElementById('flashcard-menu-screen').classList.remove('hidden');
+        }
+
+        function openSideMenu() {
+            document.getElementById('side-menu').classList.add('open');
+            document.getElementById('side-menu-overlay').classList.add('open');
+            renderWordSelectionList();
+        }
+
+        function closeSideMenu() {
+            document.getElementById('side-menu').classList.remove('open');
+            document.getElementById('side-menu-overlay').classList.remove('open');
+        }
+
+        function renderWordSelectionList() {
+            const listContainer = document.getElementById('word-selection-list');
+            const deck = customDecks[currentFlashcardDeckId];
+            
+            listContainer.innerHTML = '';
+            deck.words.forEach((word, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors';
+                div.innerHTML = `
+                    <input type="checkbox" id="word-${index}" ${wordVisibility[index] ? 'checked' : ''} 
+                           onchange="toggleWordVisibility(${index})" 
+                           class="mr-3 w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500">
+                    <label for="word-${index}" class="flex-1 cursor-pointer">
+                        <span class="font-semibold text-gray-800">${word.english}</span>
+                        <span class="text-gray-600 text-sm ml-2">- ${word.japanese}</span>
+                    </label>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        function toggleWordVisibility(index) {
+            const checkedCount = Object.values(wordVisibility).filter(v => v).length;
+            if (checkedCount === 1 && wordVisibility[index]) {
+                alert('少なくとも1つの単語を選択してください。');
+                document.getElementById(`word-${index}`).checked = true;
+                return;
+            }
+
+            wordVisibility[index] = !wordVisibility[index];
+            localStorage.setItem(`wordVisibility_${currentFlashcardDeckId}`, JSON.stringify(wordVisibility));
+            
+            updateFlashcardList();
+            currentFlashcardIndex = 0;
+            showFlashcard();
+        }
+
+        function speak(text) {
+            if (!text || typeof speechSynthesis === 'undefined') return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; // Set language to English
+            speechSynthesis.cancel(); // Cancel any previous speech
+            speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
