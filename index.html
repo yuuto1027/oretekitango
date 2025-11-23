@@ -37,9 +37,6 @@
             background-color: #1a202c;
             background-image: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
         }
-        .dark-mode .bg-gradient-to-br.from-indigo-50.via-white.to-purple-50 {
-            background-image: none;
-        }
         .dark-mode .bg-white {
             background-color: #2d3748 !important;
         }
@@ -295,7 +292,7 @@
             </div>
         </div>
 
-        <!-- デッキ詳細メニュー画面 -->
+        <!-- デッキ詳細メニュー画面（クイズ設定含む） -->
         <div id="deck-menu-detail-screen" class="hidden">
             <div class="mb-4 sm:mb-6">
                 <button onclick="goToQuizMenu()" class="inline-flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mb-4">
@@ -318,9 +315,34 @@
                     <!-- 苦手な単語がここに表示されます -->
                 </div>
             </div>
+
+            <!-- クイズ設定フォーム (Startボタンの直上に配置) -->
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-600 mb-4">
+                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3"><i class="fa-solid fa-sliders mr-2 text-indigo-500"></i>クイズ設定</h3>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- スライド式問題数選択 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-bold text-gray-500">問題数</label>
+                            <span id="quiz-question-display" class="text-sm font-bold text-indigo-600">20問</span>
+                        </div>
+                        <input type="range" id="quiz-question-count" min="4" max="50" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-500 dark:bg-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">出題範囲</label>
+                        <select id="quiz-range-type" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                            <option value="balanced" selected>バランスよく (推奨)</option>
+                            <option value="weak">苦手な単語のみ</option>
+                            <option value="new">未学習のみ</option>
+                            <option value="random">ランダム</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             
             <button id="start-quiz-from-menu-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors shadow-lg">
-                このデッキで問題を始める
+                問題を始める
             </button>
         </div>
 
@@ -377,8 +399,8 @@
                         <div class="border-t-2 border-gray-200 pt-4">
                             <h4 class="font-semibold text-gray-700 mb-3 text-sm sm:text-base">単語を追加</h4>
                             <div class="mb-3">
-                                <input type="text" id="word-english" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-2 text-sm sm:text-base" placeholder="英単語">
-                                <input type="text" id="word-japanese" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="日本語の意味">
+                                <input type="text" id="word-english" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-2 text-sm sm:text-base" placeholder="英単語 (例: apple)">
+                                <input type="text" id="word-japanese" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 text-sm sm:text-base" placeholder="日本語の意味 (例: りんご)">
                             </div>
                             <button onclick="addWordToDeck()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm sm:text-base">
                                 <i class="fa-solid fa-plus mr-2"></i>単語を追加
@@ -445,7 +467,7 @@
                 </div>
             </div>
 
-            <div class="flashcard mb-6" style="height: 400px;">
+            <div class="flashcard mb-4" style="height: 350px;">
                 <div id="flashcard-inner" class="flashcard-inner">
                     <div class="flashcard-front bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl">
                         <div class="relative w-full h-full flex items-center justify-center">
@@ -459,19 +481,36 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-4">
-                <button onclick="previousFlashcard()" class="bg-white border-2 border-gray-300 hover:border-indigo-400 text-gray-800 font-bold py-4 px-6 rounded-lg transition-all">
+            <!-- カード操作ボタン -->
+            <div class="flex justify-between items-center mb-4 gap-2">
+                <button onclick="previousFlashcard()" class="flex-1 bg-white border-2 border-gray-300 hover:border-indigo-400 text-gray-800 font-bold py-3 rounded-lg transition-all">
                     <i class="fa-solid fa-arrow-left"></i> 前へ
                 </button>
-                <button onclick="flipFlashcard()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-all">
+                <button onclick="flipFlashcard()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-lg transition-all">
                     裏返す
                 </button>
-                <button onclick="nextFlashcard()" class="bg-white border-2 border-gray-300 hover:border-indigo-400 text-gray-800 font-bold py-4 px-6 rounded-lg transition-all">
+                <button onclick="nextFlashcard()" class="flex-1 bg-white border-2 border-gray-300 hover:border-indigo-400 text-gray-800 font-bold py-3 rounded-lg transition-all">
                     次へ <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
-        </div>
 
+            <!-- 習熟度評価ボタン (苦手が左、覚えたが右) -->
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="markWordDifficulty('hard')" class="bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 font-bold py-2 rounded-lg transition-all flex flex-col items-center justify-center">
+                    <i class="fa-regular fa-face-frown text-xl mb-1"></i>
+                    <span class="text-xs">苦手</span>
+                </button>
+                <button onclick="markWordDifficulty('medium')" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-300 font-bold py-2 rounded-lg transition-all flex flex-col items-center justify-center">
+                    <i class="fa-regular fa-face-meh text-xl mb-1"></i>
+                    <span class="text-xs">少し不安</span>
+                </button>
+                <button onclick="markWordDifficulty('easy')" class="bg-green-100 hover:bg-green-200 text-green-700 border border-green-300 font-bold py-2 rounded-lg transition-all flex flex-col items-center justify-center">
+                    <i class="fa-regular fa-face-smile text-xl mb-1"></i>
+                    <span class="text-xs">覚えた</span>
+                </button>
+            </div>
+        </div>
+        
         <!-- 設定モーダル -->
         <div id="settings-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closeSettingsMenu()"></div>
         <div id="settings-menu" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 z-50 hidden transform scale-95 opacity-0 transition-all">
@@ -517,6 +556,7 @@
         
         let isMuted = localStorage.getItem('isMuted') === 'true';
 
+        // Initialize priorities if missing
         customDecks.forEach(deck => {
             deck.words.forEach(word => {
                 if (word.priority === undefined) {
@@ -543,16 +583,21 @@
 
             speak(question.english);
 
+            // Generate Options
             const options = [question.japanese];
+            // Filter out the correct answer from the pool
             const otherWords = allQuizWords.filter(w => w.japanese !== question.japanese);
             
             const incorrectOptions = new Set();
-            while (incorrectOptions.size < 3 && otherWords.length > 0) {
+            // Try to get 3 unique incorrect options
+            let attempts = 0;
+            while (incorrectOptions.size < 3 && otherWords.length > 0 && attempts < 50) {
                 const randomWord = otherWords[Math.floor(Math.random() * otherWords.length)];
                 if (!options.includes(randomWord.japanese)) {
                     incorrectOptions.add(randomWord.japanese);
                 }
-                if (options.length + incorrectOptions.size >= allQuizWords.length) break;
+                if (options.length + incorrectOptions.size >= allQuizWords.length) break; // Not enough words in deck
+                attempts++;
             }
             options.push(...incorrectOptions);
             options.sort(() => Math.random() - 0.5);
@@ -612,7 +657,9 @@
             if (lastPlayedDeckId !== -1) {
                 const deck = customDecks[lastPlayedDeckId];
                 userAnswers.forEach(answer => {
-                    const wordToUpdate = deck.words.find(w => w.english === answer.question.english);
+                    // Update priority based on performance
+                    // Use a more robust lookup in case duplicates exist (though unlikely in same deck with checks)
+                    const wordToUpdate = deck.words.find(w => w.english === answer.question.english && w.japanese === answer.question.japanese);
                     if (wordToUpdate) {
                         wordToUpdate.priority = answer.isCorrect ? Math.max(1, wordToUpdate.priority - 1) : wordToUpdate.priority + 2;
                     }
@@ -620,6 +667,7 @@
                 localStorage.setItem('customDecks', JSON.stringify(customDecks));
             }
 
+            // Animation
             const circumference = 2 * Math.PI * 80;
             const offset = circumference - (percentage / 100) * circumference;
             const circle = document.getElementById('result-circle');
@@ -699,9 +747,26 @@
             document.getElementById('deck-menu-name').innerHTML = `<i class="fa-solid fa-file-pen mr-2"></i> ${deck.name}`;
             document.getElementById('start-quiz-from-menu-btn').onclick = () => startQuizFromDeck(deckId);
             
+            // スライダーの設定
+            const slider = document.getElementById('quiz-question-count');
+            const display = document.getElementById('quiz-question-display');
+            const maxQuestions = deck.words.length;
+
+            slider.max = maxQuestions;
+            const defaultVal = Math.min(20, maxQuestions);
+            slider.min = Math.min(4, maxQuestions); 
+            slider.value = defaultVal;
+            display.textContent = defaultVal + '問';
+
+            slider.oninput = function() {
+                display.textContent = this.value + '問';
+            }
+
+            // Progress Calculation
             const progressContainer = document.getElementById('deck-progress-container');
             const words = deck.words;
             if (words.length > 0) {
+                // 学習進捗度は priority < DEFAULT_PRIORITY で判定
                 const masteredWordsCount = words.filter(word => (word.priority || DEFAULT_PRIORITY) < DEFAULT_PRIORITY).length;
                 const achievementRate = Math.round((masteredWordsCount / words.length) * 100);
 
@@ -734,6 +799,7 @@
                 progressContainer.innerHTML = '<p class="text-gray-400 text-center py-4">まだ単語がありません。</p>';
             }
 
+            // High Priority Words
             const highPriorityWordsContainer = document.getElementById('high-priority-words');
             highPriorityWordsContainer.innerHTML = '';
             const topWords = [...deck.words].sort((a, b) => b.priority - a.priority).filter(w => w.priority > DEFAULT_PRIORITY).slice(0, 5);
@@ -868,10 +934,24 @@
         function addWordToDeck() {
             const english = document.getElementById('word-english').value.trim();
             const japanese = document.getElementById('word-japanese').value.trim();
-            if (!english || !japanese) { alert('英単語と日本語の意味を両方入力してください。'); return; }
+            
+            if (!english || !japanese) { 
+                alert('英単語と日本語の意味を両方入力してください。'); 
+                return; 
+            }
+
+            // 重複チェック (Case insensitive)
+            const isDuplicate = currentDeckWords.some(w => w.english.toLowerCase() === english.toLowerCase());
+            if (isDuplicate) {
+                alert(`「${english}」は既にこのデッキに含まれています。`);
+                return;
+            }
+
             currentDeckWords.push({ english, japanese, priority: DEFAULT_PRIORITY });
-            document.getElementById('word-english').value = ''; document.getElementById('word-japanese').value = '';
-            document.getElementById('word-english').focus(); renderDeckWordsList();
+            document.getElementById('word-english').value = ''; 
+            document.getElementById('word-japanese').value = '';
+            document.getElementById('word-english').focus(); 
+            renderDeckWordsList();
         }
 
         function renderDeckWordsList(searchTerm = '') {
@@ -917,8 +997,8 @@
         function quitQuiz() {
             if (confirm('クイズを中断しますか？\n現在の進捗は保存されません。')) {
                 document.getElementById('quiz-screen').classList.add('hidden');
-                document.getElementById('quiz-menu-screen').classList.remove('hidden');
-                quizQuestions = []; currentQuestionIndex = 0; userAnswers = []; allQuizWords = []; lastPlayedDeckId = -1;
+                document.getElementById('deck-menu-detail-screen').classList.remove('hidden');
+                quizQuestions = []; currentQuestionIndex = 0; userAnswers = []; allQuizWords = [];
             }
         }
 
@@ -929,43 +1009,84 @@
                 alert('このデッキには単語が足りません（最低4語必要です）。');
                 return;
             }
-            allQuizWords = [...sourceWords];
-            const numQuestions = Math.min(20, sourceWords.length);
-            
-            let finalQuestions = [];
-            const unseenWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) === DEFAULT_PRIORITY);
-            const reviewWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) !== DEFAULT_PRIORITY);
 
-            const numUnseenQuestions = Math.min(unseenWords.length, Math.ceil(numQuestions * 0.3));
-            if (numUnseenQuestions > 0) {
-                const shuffledUnseen = unseenWords.sort(() => 0.5 - Math.random());
-                finalQuestions = shuffledUnseen.slice(0, numUnseenQuestions);
-            }
-            
-            const remainingSlots = numQuestions - finalQuestions.length;
-            if (remainingSlots > 0 && reviewWords.length > 0) {
-                const weightedPool = reviewWords.flatMap(word => Array(word.priority || DEFAULT_PRIORITY).fill(word));
-                const shuffledPool = weightedPool.sort(() => 0.5 - Math.random());
-                
-                const uniqueWordsFromPool = new Set();
-                for (const word of shuffledPool) {
-                    if (uniqueWordsFromPool.size >= remainingSlots) break;
-                    if (!finalQuestions.some(q => q.english === word.english)) {
-                        uniqueWordsFromPool.add(word);
-                    }
+            // Get Settings
+            const questionCountSetting = parseInt(document.getElementById('quiz-question-count').value);
+            const rangeType = document.getElementById('quiz-range-type').value;
+
+            // Apply Filters
+            let candidateWords = [...sourceWords];
+            allQuizWords = [...sourceWords]; // Used for generating incorrect options
+
+            if (rangeType === 'weak') {
+                // Filter where priority > DEFAULT
+                candidateWords = candidateWords.filter(w => (w.priority || DEFAULT_PRIORITY) > DEFAULT_PRIORITY);
+                if (candidateWords.length === 0) {
+                    alert('苦手な単語（まだ学習が浅い単語）はありません！\n「バランスよく」または「ランダム」を選んでください。');
+                    return;
                 }
-                finalQuestions.push(...Array.from(uniqueWordsFromPool));
+                // Sort by priority descending
+                candidateWords.sort((a, b) => b.priority - a.priority);
+            } else if (rangeType === 'new') {
+                // Filter where priority == DEFAULT
+                candidateWords = candidateWords.filter(w => (w.priority || DEFAULT_PRIORITY) === DEFAULT_PRIORITY);
+                if (candidateWords.length === 0) {
+                    alert('未学習の単語はありません！');
+                    return;
+                }
+                // Shuffle new words
+                candidateWords.sort(() => 0.5 - Math.random());
+            } else if (rangeType === 'random') {
+                candidateWords.sort(() => 0.5 - Math.random());
+            } else {
+                // 'balanced' - Existing logic
+                let finalQuestions = [];
+                const unseenWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) === DEFAULT_PRIORITY);
+                const reviewWords = sourceWords.filter(w => (w.priority || DEFAULT_PRIORITY) !== DEFAULT_PRIORITY);
+                const numQuestions = Math.min(questionCountSetting, sourceWords.length);
+
+                // 30% New
+                const numUnseenQuestions = Math.min(unseenWords.length, Math.ceil(numQuestions * 0.3));
+                if (numUnseenQuestions > 0) {
+                    const shuffledUnseen = unseenWords.sort(() => 0.5 - Math.random());
+                    finalQuestions = shuffledUnseen.slice(0, numUnseenQuestions);
+                }
+                
+                // Rest from Review (Weighted)
+                const remainingSlots = numQuestions - finalQuestions.length;
+                if (remainingSlots > 0 && reviewWords.length > 0) {
+                    const weightedPool = reviewWords.flatMap(word => Array(word.priority || DEFAULT_PRIORITY).fill(word));
+                    const shuffledPool = weightedPool.sort(() => 0.5 - Math.random());
+                    
+                    const uniqueWordsFromPool = new Set();
+                    for (const word of shuffledPool) {
+                        if (uniqueWordsFromPool.size >= remainingSlots) break;
+                        if (!finalQuestions.some(q => q.english === word.english)) {
+                            uniqueWordsFromPool.add(word);
+                        }
+                    }
+                    finalQuestions.push(...Array.from(uniqueWordsFromPool));
+                }
+
+                // Fill if still needed
+                if (finalQuestions.length < numQuestions) {
+                    const existingEngWords = new Set(finalQuestions.map(w => w.english));
+                    const remainingWords = sourceWords.filter(w => !existingEngWords.has(w.english))
+                                                      .sort(() => 0.5 - Math.random());
+                    const needed = numQuestions - finalQuestions.length;
+                    finalQuestions.push(...remainingWords.slice(0, needed));
+                }
+
+                candidateWords = finalQuestions;
             }
 
-            if (finalQuestions.length < numQuestions) {
-                const existingEngWords = new Set(finalQuestions.map(w => w.english));
-                const remainingWords = sourceWords.filter(w => !existingEngWords.has(w.english))
-                                                  .sort(() => 0.5 - Math.random());
-                const needed = numQuestions - finalQuestions.length;
-                finalQuestions.push(...remainingWords.slice(0, needed));
-            }
+            // Limit question count
+            const finalQuestionsCount = Math.min(questionCountSetting, candidateWords.length);
+            quizQuestions = candidateWords.slice(0, finalQuestionsCount);
+            
+            // Final Shuffle
+            quizQuestions.sort(() => 0.5 - Math.random());
 
-            quizQuestions = finalQuestions.sort(() => 0.5 - Math.random());
             currentQuestionIndex = 0;
             userAnswers = [];
             document.getElementById('deck-menu-detail-screen').classList.add('hidden');
@@ -1067,6 +1188,7 @@
             flashcardList = customDecks[currentFlashcardDeckId].words
                 .map((word, index) => ({ ...word, originalIndex: index }))
                 .filter(word => wordVisibility[word.originalIndex])
+                // Don't shuffle here if we want to keep order, but random is usually good for flashcards
                 .sort(() => 0.5 - Math.random());
         }
 
@@ -1088,6 +1210,47 @@
         function flipFlashcard() { if(flashcardList.length > 0) document.getElementById('flashcard-inner').classList.toggle('flipped'); }
         function nextFlashcard() { if (flashcardList.length === 0) return; currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardList.length; showFlashcard(); }
         function previousFlashcard() { if (flashcardList.length === 0) return; currentFlashcardIndex = (currentFlashcardIndex - 1 + flashcardList.length) % flashcardList.length; showFlashcard(); }
+
+        // Flashcard Priority Marking
+        function markWordDifficulty(level) {
+            if (flashcardList.length === 0) return;
+            
+            const currentCard = flashcardList[currentFlashcardIndex];
+            const realWord = customDecks[currentFlashcardDeckId].words[currentCard.originalIndex];
+
+            if (level === 'easy') {
+                if (realWord.priority > DEFAULT_PRIORITY) {
+                    realWord.priority = Math.max(DEFAULT_PRIORITY, realWord.priority - 5);
+                }
+                
+                // 隐藏逻辑
+                wordVisibility[currentCard.originalIndex] = false;
+                localStorage.setItem(`wordVisibility_${currentFlashcardDeckId}`, JSON.stringify(wordVisibility));
+                
+                updateFlashcardList();
+                
+                if (currentFlashcardIndex >= flashcardList.length) {
+                    currentFlashcardIndex = 0;
+                }
+                
+                localStorage.setItem('customDecks', JSON.stringify(customDecks));
+                showFlashcard();
+                
+            } else {
+                if (level === 'medium') {
+                    realWord.priority += 2;
+                } else if (level === 'hard') {
+                    realWord.priority += 5;
+                }
+                localStorage.setItem('customDecks', JSON.stringify(customDecks));
+                nextFlashcard();
+            }
+        }
+
+        function showToast(text) {
+            // トースト機能は削除されたため、空の関数として残すか削除してよい
+            // ここでは互換性のために残していますが、処理は行いません
+        }
 
         function backToFlashcardMenu() { document.getElementById('flashcard-screen').classList.add('hidden'); document.getElementById('flashcard-menu-screen').classList.remove('hidden'); }
 
@@ -1153,7 +1316,6 @@
             document.getElementById('deck-import-form').classList.remove('hidden');
         }
         
-        // ▼▼▼ 共有・インポート関数を最終修正 ▼▼▼
         async function shareDeck(index) {
             try {
                 const deckToShare = customDecks[index];
@@ -1165,15 +1327,12 @@
                 const jsonString = JSON.stringify(shareableDeck);
                 const utf8Bytes = new TextEncoder().encode(jsonString);
                 const compressedBytes = pako.deflate(utf8Bytes);
-
-                // Uint8ArrayをBase64に変換する、最も安全で互換性の高い方法
                 const base64String = btoa(String.fromCharCode.apply(null, compressedBytes));
 
                 await navigator.clipboard.writeText(base64String);
                 alert(`デッキ「${deckToShare.name}」の共有コードをクリップボードにコピーしました。`);
 
             } catch (e) {
-                 // 上記の方法で失敗した場合のフォールバック（圧縮なし）
                 try {
                     console.warn("Compression failed, falling back to non-compressed sharing:", e);
                     const deckToShare = customDecks[index];
@@ -1182,7 +1341,6 @@
                         words: deckToShare.words.map(w => ({ english: w.english, japanese: w.japanese }))
                     };
                     const jsonString = JSON.stringify(shareableDeck);
-                    // unescapeとencodeURIComponentは非推奨だが、この目的では最も互換性が高い
                     const base64String = btoa(unescape(encodeURIComponent(jsonString)));
 
                     await navigator.clipboard.writeText(base64String);
@@ -1203,7 +1361,6 @@
             }
             try {
                 let jsonString;
-                // まずは圧縮データとして解凍を試みる
                 try {
                     const binaryString = atob(code);
                     const bytes = new Uint8Array(binaryString.length);
@@ -1213,7 +1370,6 @@
                     const decompressedBytes = pako.inflate(bytes);
                     jsonString = new TextDecoder().decode(decompressedBytes);
                 } catch (e) {
-                    // 解凍に失敗したら、圧縮されていないデータとして処理を試みる
                     console.warn("Decompression failed, trying non-compressed import:", e);
                     jsonString = decodeURIComponent(escape(atob(code)));
                 }
@@ -1250,7 +1406,6 @@
                 console.error('Import error:', e);
             }
         }
-        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
